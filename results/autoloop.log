@@ -65,3 +65,7 @@
 [2026-08-30 23:14:42Z] --- iteration 1/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 23:15:24Z] wrote v013_hypothesis_fuse_each_residual.py
 [2026-08-30 23:15:49Z] no improvement (champion still 1.6982), flat=1
+[2026-08-30 23:15:52Z] pushed: iteration 1 — v013_hypothesis_fuse_each_residual.py rejected, champion 1.6982
+[2026-08-30 23:15:57Z] --- iteration 2/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 23:16:39Z] wrote v014_residual_as_gemm_c.py
+[2026-08-30 23:19:41Z] IMPROVED 1.6982 -> 1.7858 (v014_residual_as_gemm_c.py)
