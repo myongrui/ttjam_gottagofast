@@ -22,3 +22,7 @@
 [2026-08-30 15:50:28Z] --- iteration 1/20 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 15:50:48Z] wrote v005_eliminate_per_layer_host.py
 [2026-08-30 15:51:12Z] no improvement (champion still 1.6982), flat=1
+[2026-08-30 15:51:15Z] pushed: iteration 1 — v005_eliminate_per_layer_host.py rejected, champion 1.6982
+[2026-08-30 15:51:19Z] --- iteration 2/20 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 15:51:44Z] wrote v006_compile_only_the_ffn.py
+[2026-08-30 15:52:18Z] no improvement (champion still 1.6982), flat=2
