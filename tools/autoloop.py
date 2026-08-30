@@ -115,6 +115,30 @@ def pod_action(action: str) -> bool:
     return False
 
 
+def push_results(reason: str) -> bool:
+    """Commit and push the run's output so a cloud routine can read it.
+
+    A scheduled agent runs in Anthropic's cloud with its own checkout; it has no
+    access to this machine. Without this, a 2am health check reads whatever was
+    last pushed and reports on stale state.
+    """
+    try:
+        subprocess.run(["git", "add", "results", "candidates"], cwd=ROOT, check=True,
+                       capture_output=True)
+        staged = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=ROOT)
+        if staged.returncode == 0:
+            log("nothing new to push"); return True
+        msg = f"autoloop: {reason}"
+        subprocess.run(["git", "commit", "-m", msg], cwd=ROOT, check=True,
+                       capture_output=True)
+        subprocess.run(["git", "push"], cwd=ROOT, check=True, capture_output=True)
+        log("pushed results to origin")
+        return True
+    except subprocess.CalledProcessError as e:
+        log(f"push failed: {e.stderr[:200].decode(errors='replace') if e.stderr else e}")
+        return False
+
+
 def load_dotenv(path: Path = ROOT / ".env") -> None:
     """Read KEY=VALUE lines from a local .env, if present.
 
@@ -333,6 +357,10 @@ def main() -> int:
     p.add_argument("--model", default=None,
                    help="defaults to $OPENAI_MODEL (or .env); no built-in "
                         "fallback, since a guessed model id fails at the API")
+    p.add_argument("--push-results", action="store_true",
+                   help="commit and push results/ and candidates/ on exit. "
+                        "Required for a scheduled cloud agent to see current "
+                        "state: it clones the repo and cannot read this machine")
     p.add_argument("--stop-pod", action="store_true",
                    help="stop the pod when the loop exits, for any reason. "
                         "Strongly recommended for unattended runs: otherwise a "
@@ -421,6 +449,8 @@ def main() -> int:
 
     log(f"stop: {stop_reason}")
     write_status(stop_reason, best_score, done, decision)
+    if args.push_results and not args.dry_run:
+        push_results(stop_reason)
     if args.stop_pod and not args.dry_run:
         pod_action("stop")
     return 0
