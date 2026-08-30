@@ -26,3 +26,7 @@
 [2026-08-30 15:51:19Z] --- iteration 2/20 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 15:51:44Z] wrote v006_compile_only_the_ffn.py
 [2026-08-30 15:52:18Z] no improvement (champion still 1.6982), flat=2
+[2026-08-30 15:52:21Z] pushed: iteration 2 — v006_compile_only_the_ffn.py rejected, champion 1.6982
+[2026-08-30 15:52:25Z] --- iteration 3/20 --- route=STRUCTURAL profile=general parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 15:53:10Z] wrote v007_fuse_every_residual_add.py
+[2026-08-30 15:56:06Z] aborting on KeyboardInterrupt
