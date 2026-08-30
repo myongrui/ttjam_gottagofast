@@ -1,0 +1,185 @@
+{
+  "candidate": "v008_fuse_the_ffn_input.py",
+  "candidate_doc": "v008 -- fuse the FFN input projection's exact GELU epilogue.\n\nHypothesis: after v007 has removed residual/LayerNorm launches, the remaining\nsmall-shape latency is dominated by the standalone exact-GELU launch between\nffn_in and ffn_out.  This candidate replaces `Linear(ffn_in) + GELU` with one\nTriton GEMM epilogue kernel.  The kernel computes the biased first FFN\nprojection and exact erf-based GELU before writing the activation consumed by\nffn_out, eliminating one launch per transformer block while retaining fp32\naccumulation and the baseline's exact GELU definition.",
+  "incumbent": "v001_sdpa_fused_qkv.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-30T15:57:34",
+  "cases": [
+    {
+      "case": 1,
+      "shape": {
+        "case": 1,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.002007097005844116,
+            "max_rel": 119.98787689208984
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 0.00024127960205078125,
+            "max_rel": 10.128348350524902
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.004289567470550537,
+            "max_rel": 370.96307373046875
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 0.0017203688621520996,
+            "max_rel": 339.7570495605469
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 0.0009359121322631836,
+            "max_rel": 800.6041870117188
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 0.0013627409934997559,
+            "max_rel": 1.7255467176437378
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 0.00019177794456481934,
+            "max_rel": 0.6961706280708313
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0022810697555541992,
+            "max_rel": 12.30564022064209
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 0.0016560554504394531,
+            "max_rel": 16.4600830078125
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 0.0006886720657348633,
+            "max_rel": 59.788387298583984
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 12,
+      "shape": {
+        "case": 12,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 32,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 0.0016424357891082764,
+            "max_rel": 29.049421310424805
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 0.00022459030151367188,
+            "max_rel": 25.839017868041992
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0035862326622009277,
+            "max_rel": 53.43640899658203
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 0.001662135124206543,
+            "max_rel": 42.4452018737793
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 0.0008442848920822144,
+            "max_rel": 21.703598022460938
+          }
+        ]
+      },
+      "status": "incorrect"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_unchanged": true,
+  "failed_cases": [
+    1,
+    2,
+    12
+  ],
+  "n_scored": 0,
+  "geomean_speedup": 0.0,
+  "score": 0.0
+}

@@ -30,3 +30,11 @@
 [2026-08-30 15:52:25Z] --- iteration 3/20 --- route=STRUCTURAL profile=general parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 15:53:10Z] wrote v007_fuse_every_residual_add.py
 [2026-08-30 15:56:06Z] aborting on KeyboardInterrupt
+[2026-08-30 15:56:09Z] pushed: aborted on KeyboardInterrupt
+[2026-08-30 15:56:10Z] pod 132yirw3l7rq7s: stop requested
+[2026-08-30 15:56:31Z] pod 132yirw3l7rq7s: start requested
+[2026-08-30 15:56:35Z] pod ready after 1 probe(s)
+[2026-08-30 15:56:35Z] start model=gpt-5.6-terra profile=auto incumbent=v001_sdpa_fused_qkv.py score=1.6982
+[2026-08-30 15:56:40Z] --- iteration 1/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 15:57:19Z] wrote v008_fuse_the_ffn_input.py
+[2026-08-30 15:57:43Z] no improvement (champion still 1.6982), flat=1
