@@ -38,3 +38,7 @@
 [2026-08-30 15:56:40Z] --- iteration 1/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 15:57:19Z] wrote v008_fuse_the_ffn_input.py
 [2026-08-30 15:57:43Z] no improvement (champion still 1.6982), flat=1
+[2026-08-30 15:57:45Z] pushed: iteration 1 — v008_fuse_the_ffn_input.py rejected, champion 1.6982
+[2026-08-30 15:57:50Z] --- iteration 2/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 15:58:32Z] wrote v009_native_transformerencoderlayer_fast_path.py
+[2026-08-30 15:58:56Z] no improvement (champion still 1.6982), flat=2
