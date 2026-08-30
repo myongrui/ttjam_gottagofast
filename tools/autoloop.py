@@ -44,6 +44,9 @@ import routing  # noqa: E402
 
 API_BASE = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
 LOG = ROOT / "results" / "autoloop.log"
+# Cloudflare rejects urllib's default "Python-urllib/x.y" agent with 403/1010 in
+# front of api.runpod.io, so every request this file makes names itself.
+USER_AGENT = "techjam-autoloop/1.0"
 STATUS = ROOT / "results" / "STATUS.md"
 
 # Patterns rejected before a generated candidate is ever executed. The first
@@ -101,7 +104,8 @@ def pod_action(action: str) -> bool:
     req = urllib.request.Request(
         url, data=json.dumps({"action": action}).encode(),
         headers={"Authorization": f"Bearer {key}",
-                 "Content-Type": "application/json"})
+                 "Content-Type": "application/json",
+                 "User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
             resp.read()
@@ -273,7 +277,8 @@ def _post(url: str, body: dict, key: str, timeout: int) -> dict:
     req = urllib.request.Request(
         url, data=json.dumps(body).encode(),
         headers={"Authorization": f"Bearer {key}",
-                 "Content-Type": "application/json"})
+                 "Content-Type": "application/json",
+                 "User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return json.load(resp)
 

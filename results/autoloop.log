@@ -6,3 +6,11 @@
 [2026-08-30 15:04:39Z] dry-run: skipping evaluation
 [2026-08-30 15:04:39Z] stop: completed all iterations
 [2026-08-30 15:04:39Z] wrote results/STATUS.md
+[2026-08-30 15:40:55Z] pod start failed: HTTP 403 error code: 1010
+
+[2026-08-30 15:41:03Z] pod start failed: HTTP 403 error code: 1010
+
+[2026-08-30 15:41:32Z] pod start failed: HTTP 403 error code: 1010
+
+[2026-08-30 15:46:12Z] pod 132yirw3l7rq7s: start requested
+[2026-08-30 15:46:31Z] pod ready after 2 probe(s)
