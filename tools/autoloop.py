@@ -149,6 +149,22 @@ def push_results(reason: str) -> bool:
         return False
 
 
+def wait_for_pod(attempts: int = 30, delay: int = 10) -> bool:
+    """Poll until the pod answers over ssh, or give up.
+
+    A started pod reports RUNNING well before sshd accepts connections, so
+    polling the real transport is the only trustworthy readiness signal.
+    """
+    for i in range(1, attempts + 1):
+        probe = subprocess.run([str(ROOT / "tools" / "podrun"), "echo ALIVE"],
+                               capture_output=True, text=True, cwd=ROOT)
+        if "ALIVE" in probe.stdout:
+            log(f"pod ready after {i} probe(s)")
+            return True
+        time.sleep(delay)
+    return False
+
+
 def load_dotenv(path: Path = ROOT / ".env") -> None:
     """Read KEY=VALUE lines from a local .env, if present.
 
@@ -367,6 +383,10 @@ def main() -> int:
     p.add_argument("--model", default=None,
                    help="defaults to $OPENAI_MODEL (or .env); no built-in "
                         "fallback, since a guessed model id fails at the API")
+    p.add_argument("--start-pod", action="store_true",
+                   help="start the pod at launch and wait for ssh. With "
+                        "--stop-pod this makes the run self-contained: no "
+                        "manual RunPod step at either end")
     p.add_argument("--push-results", action="store_true",
                    help="commit and push results/ and candidates/ on exit. "
                         "Required for a scheduled cloud agent to see current "
@@ -389,6 +409,15 @@ def main() -> int:
             "    -H \"Authorization: Bearer $OPENAI_API_KEY\" \\\n"
             "    | python3 -c \"import json,sys; print('\\n'.join("
             "sorted(m['id'] for m in json.load(sys.stdin)['data'])))\"")
+
+    if args.start_pod and not args.dry_run:
+        if not pod_action("start"):
+            raise SystemExit("could not start the pod; aborting before spending "
+                             "anything on generation")
+        if not wait_for_pod():
+            log("pod started but never answered ssh; stopping it again")
+            pod_action("stop")
+            raise SystemExit("pod did not become reachable")
 
     deadline = time.time() + args.max_hours * 3600
     best = ledger.champion(ledger.FULL_CASES, dtype=args.dtype)
