@@ -57,3 +57,11 @@
 [2026-08-30 16:02:59Z] pushed: iteration 5 — v012_hypothesis_fuse_each_layernorm.py rejected, champion 1.6982
 [2026-08-30 16:02:59Z] stop: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
 [2026-08-30 16:02:59Z] wrote results/STATUS.md
+[2026-08-30 16:03:02Z] pushed: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
+[2026-08-30 16:03:04Z] pod 132yirw3l7rq7s: stop requested
+[2026-08-30 23:14:18Z] pod 132yirw3l7rq7s: start requested
+[2026-08-30 23:14:37Z] pod ready after 2 probe(s)
+[2026-08-30 23:14:37Z] start model=gpt-5.6-terra profile=auto incumbent=v001_sdpa_fused_qkv.py score=1.6982
+[2026-08-30 23:14:42Z] --- iteration 1/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 23:15:24Z] wrote v013_hypothesis_fuse_each_residual.py
+[2026-08-30 23:15:49Z] no improvement (champion still 1.6982), flat=1
