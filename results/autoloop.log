@@ -42,3 +42,7 @@
 [2026-08-30 15:57:50Z] --- iteration 2/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 15:58:32Z] wrote v009_native_transformerencoderlayer_fast_path.py
 [2026-08-30 15:58:56Z] no improvement (champion still 1.6982), flat=2
+[2026-08-30 15:58:59Z] pushed: iteration 2 — v009_native_transformerencoderlayer_fast_path.py rejected, champion 1.6982
+[2026-08-30 15:59:03Z] --- iteration 3/120 --- route=STRUCTURAL profile=general parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 15:59:48Z] wrote v010_hypothesis_the_attention_output.py
+[2026-08-30 16:00:17Z] no improvement (champion still 1.6982), flat=3

@@ -1,0 +1,285 @@
+{
+  "candidate": "v010_hypothesis_the_attention_output.py",
+  "candidate_doc": "Hypothesis: the attention output projection need not materialize the expensive\n[B, S, H, Dh] transpose/repack between SDPA and out_proj.\n\nMechanism: SDPA returns head-major [B, H, S, Dh] storage.  The custom Triton\nkernel reads that layout directly while performing the output-projection GEMM\nand bias epilogue, writing [B, S, D].  This removes the intermediate transpose/\ncontiguous-copy launch before every attention output projection while retaining\nthe fused-QKV and Flash/SDPA attention structure.",
+  "incumbent": "v001_sdpa_fused_qkv.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-30T16:00:03",
+  "cases": [
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 2.233180284500122,
+            "max_rel": 945.0746459960938
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.2972067594528198,
+            "max_rel": 1448.5311279296875
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 4.459067344665527,
+            "max_rel": 29240.884765625
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 1.4293687343597412,
+            "max_rel": 1244.707763671875
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.9516643285751343,
+            "max_rel": 556.0860595703125
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 6,
+      "shape": {
+        "case": 6,
+        "batch_size": 10000,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 2.441,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 2.7255263328552246,
+            "max_rel": 13144902.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.3774266242980957,
+            "max_rel": 15618172928.0
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 7.015068054199219,
+            "max_rel": 211401840.0
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 2.736156940460205,
+            "max_rel": 18134910.0
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 1.533423662185669,
+            "max_rel": 5926381.5
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 8,
+      "shape": {
+        "case": 8,
+        "batch_size": 64,
+        "d_model": 1024,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 1024
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 2.4526586532592773,
+            "max_rel": 1655373.375
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.3340068459510803,
+            "max_rel": 61546.6875
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 6.600517272949219,
+            "max_rel": 42072248.0
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 2.534273147583008,
+            "max_rel": 959621.5625
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 1.2227051258087158,
+            "max_rel": 422107.65625
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 11,
+      "shape": {
+        "case": 11,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 16,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.062,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 2.375969886779785,
+            "max_rel": 31469746.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.33260029554367065,
+            "max_rel": 8973.8251953125
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 6.173071384429932,
+            "max_rel": 1515751.875
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 2.148879289627075,
+            "max_rel": 169524.78125
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 1.6871002912521362,
+            "max_rel": 118767.6640625
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 13,
+      "shape": {
+        "case": 13,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 1024,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 1.0,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 2.216472625732422,
+            "max_rel": 3025223.25
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.29575932025909424,
+            "max_rel": 213011.484375
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 5.999728202819824,
+            "max_rel": 1367214.375
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 2.293780565261841,
+            "max_rel": 1297991.125
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 1.3363325595855713,
+            "max_rel": 343788.28125
+          }
+        ]
+      },
+      "status": "incorrect"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_unchanged": true,
+  "failed_cases": [
+    2,
+    6,
+    8,
+    11,
+    13
+  ],
+  "n_scored": 0,
+  "geomean_speedup": 0.0,
+  "score": 0.0
+}
