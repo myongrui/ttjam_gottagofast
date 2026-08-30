@@ -116,26 +116,36 @@ def pod_action(action: str) -> bool:
 
 
 def push_results(reason: str) -> bool:
-    """Commit and push the run's output so a cloud routine can read it.
+    """Commit and push output so a scheduled reader sees current state.
 
-    A scheduled agent runs in Anthropic's cloud with its own checkout; it has no
-    access to this machine. Without this, a 2am health check reads whatever was
-    last pushed and reports on stale state.
+    Called after EVERY iteration, not only at exit: a long run that pushed only
+    on completion would be invisible to a check that fires while it is still
+    running, which is precisely when someone wants to look. Rebases first,
+    because a second session may have pushed in the meantime.
     """
     try:
-        subprocess.run(["git", "add", "results", "candidates"], cwd=ROOT, check=True,
-                       capture_output=True)
-        staged = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=ROOT)
-        if staged.returncode == 0:
-            log("nothing new to push"); return True
-        msg = f"autoloop: {reason}"
-        subprocess.run(["git", "commit", "-m", msg], cwd=ROOT, check=True,
-                       capture_output=True)
+        subprocess.run(["git", "add", "results", "candidates"], cwd=ROOT,
+                       check=True, capture_output=True)
+        if subprocess.run(["git", "diff", "--cached", "--quiet"],
+                          cwd=ROOT).returncode == 0:
+            return True                      # nothing new; stay quiet in-loop
+        subprocess.run(["git", "commit", "-m", f"autoloop: {reason}"], cwd=ROOT,
+                       check=True, capture_output=True)
+        # Integrate anyone else's commits before pushing; --autostash keeps a
+        # dirty tree from aborting the rebase.
+        pull = subprocess.run(["git", "pull", "--rebase", "--autostash"],
+                              cwd=ROOT, capture_output=True)
+        if pull.returncode:
+            log("pull --rebase failed; leaving the commit local for this cycle")
+            subprocess.run(["git", "rebase", "--abort"], cwd=ROOT,
+                           capture_output=True)
+            return False
         subprocess.run(["git", "push"], cwd=ROOT, check=True, capture_output=True)
-        log("pushed results to origin")
+        log(f"pushed: {reason}")
         return True
     except subprocess.CalledProcessError as e:
-        log(f"push failed: {e.stderr[:200].decode(errors='replace') if e.stderr else e}")
+        detail = e.stderr[:200].decode(errors="replace") if e.stderr else str(e)
+        log(f"push failed: {detail}")
         return False
 
 
@@ -443,9 +453,13 @@ def main() -> int:
         if score > best_score + 1e-9:
             log(f"IMPROVED {best_score:.4f} -> {score:.4f} ({now['candidate']})")
             best_score, flat = score, 0
+            outcome = f"{name} promoted, {score:.4f}"
         else:
             flat += 1
             log(f"no improvement (champion still {score:.4f}), flat={flat}")
+            outcome = f"{name} rejected, champion {score:.4f}"
+        if args.push_results:
+            push_results(f"iteration {i} — {outcome}")
 
     log(f"stop: {stop_reason}")
     write_status(stop_reason, best_score, done, decision)
@@ -463,7 +477,10 @@ if __name__ == "__main__":
         raise
     except BaseException as exc:      # includes KeyboardInterrupt
         # An unattended run that dies must not leave the GPU billing.
-        if "--stop-pod" in sys.argv and "--dry-run" not in sys.argv:
-            log(f"aborting on {type(exc).__name__}; stopping pod")
-            pod_action("stop")
+        if "--dry-run" not in sys.argv:
+            log(f"aborting on {type(exc).__name__}")
+            if "--push-results" in sys.argv:
+                push_results(f"aborted on {type(exc).__name__}")
+            if "--stop-pod" in sys.argv:
+                pod_action("stop")
         raise
