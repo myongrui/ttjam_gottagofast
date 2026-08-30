@@ -14,3 +14,11 @@
 
 [2026-08-30 15:46:12Z] pod 132yirw3l7rq7s: start requested
 [2026-08-30 15:46:31Z] pod ready after 2 probe(s)
+[2026-08-30 15:48:11Z] pod start failed: HTTP 409 {"detail":"action \"start\" is not valid for status \"RUNNING\"","status":409,"title":"Conflict"}
+
+[2026-08-30 15:50:05Z] pod 132yirw3l7rq7s: start requested
+[2026-08-30 15:50:24Z] pod ready after 2 probe(s)
+[2026-08-30 15:50:24Z] start model=gpt-5.6-terra profile=auto incumbent=v001_sdpa_fused_qkv.py score=1.6982
+[2026-08-30 15:50:28Z] --- iteration 1/20 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 15:50:48Z] wrote v005_eliminate_per_layer_host.py
+[2026-08-30 15:51:12Z] no improvement (champion still 1.6982), flat=1
