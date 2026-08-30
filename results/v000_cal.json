@@ -1,0 +1,240 @@
+{
+  "candidate": "v000_identity.py",
+  "candidate_doc": "v000 -- identity control. Returns the unmodified baseline.\n\nNot an optimization: this is the harness's calibration run. It should score\n~1.00x on every shape. Any systematic deviation means the measurement itself is\nbiased, and every later speedup would inherit that bias.",
+  "dtype": "bfloat16",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-30T13:37:56",
+  "cases": [
+    {
+      "case": 1,
+      "shape": {
+        "case": 1,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 2.4949759244918823,
+        "mean_ms": 2.4999366945690578,
+        "min_ms": 2.4780800342559814,
+        "wall_ms": 2.4480290710926056,
+        "n": 90
+      },
+      "peak_mem_gib": 0.066,
+      "baseline": {
+        "median_ms": 2.4872961044311523,
+        "mean_ms": 2.4918698814180162,
+        "min_ms": 2.4729599952697754,
+        "wall_ms": 2.445823388795058,
+        "n": 90
+      },
+      "speedup": 0.9969218861050557,
+      "speedup_wall": 0.9990989966893803,
+      "wall_to_event_ratio": 0.981,
+      "stream_ok": true,
+      "status": "ok"
+    },
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 2.571776032447815,
+        "mean_ms": 2.587306663725111,
+        "min_ms": 2.5128960609436035,
+        "wall_ms": 2.514214813709259,
+        "n": 90
+      },
+      "peak_mem_gib": 0.011,
+      "baseline": {
+        "median_ms": 2.520064115524292,
+        "mean_ms": 2.523932456970215,
+        "min_ms": 2.5088000297546387,
+        "wall_ms": 2.577367859582106,
+        "n": 90
+      },
+      "speedup": 0.9798925270820322,
+      "speedup_wall": 1.025118397015439,
+      "wall_to_event_ratio": 0.978,
+      "stream_ok": true,
+      "status": "ok"
+    },
+    {
+      "case": 12,
+      "shape": {
+        "case": 12,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 32,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 0.0,
+            "max_rel": 0.0
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 2.5041919946670532,
+        "mean_ms": 2.50575074089898,
+        "min_ms": 2.491391897201538,
+        "wall_ms": 2.4551725015044212,
+        "n": 90
+      },
+      "peak_mem_gib": 0.018,
+      "baseline": {
+        "median_ms": 2.50982403755188,
+        "mean_ms": 2.5578154881795245,
+        "min_ms": 2.495487928390503,
+        "wall_ms": 2.4607417484124503,
+        "n": 90
+      },
+      "speedup": 1.0022490459584652,
+      "speedup_wall": 1.0022683729573447,
+      "wall_to_event_ratio": 0.98,
+      "stream_ok": true,
+      "status": "ok"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_unchanged": true,
+  "failed_cases": [],
+  "n_scored": 3,
+  "geomean_speedup": 0.9929752166331469,
+  "score": 0.9929752166331469
+}

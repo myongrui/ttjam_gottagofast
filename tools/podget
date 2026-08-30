@@ -1,0 +1,14 @@
+#!/bin/bash
+# podget <remote-file> <local-file> — download via base64 over the proxy shell.
+set -uo pipefail
+POD="${POD_SSH:-132yirw3l7rq7s-644121e6@ssh.runpod.io}"
+KEY="${POD_KEY:-$HOME/.ssh/id_ed25519}"
+REMOTE="$1"; LOCAL="$2"
+{
+  echo 'stty -echo 2>/dev/null'
+  echo "echo __PODRUN_BEGIN; base64 -w0 '$REMOTE' 2>/dev/null || base64 '$REMOTE' | tr -d '\n'; echo; echo __PODRUN_END"
+  echo 'exit'
+} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o LogLevel=ERROR -tt "$POD" 2>&1 \
+  | tr -d '\r' | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' \
+  | awk '$0=="__PODRUN_BEGIN"{f=1;next} $0=="__PODRUN_END"{f=0} f' | tr -d '\n' | base64 -d > "$LOCAL"
+echo "got $LOCAL ($(wc -c < "$LOCAL") bytes)"

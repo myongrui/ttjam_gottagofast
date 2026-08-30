@@ -1,0 +1,684 @@
+{
+  "candidate": "v001_sdpa_fused_qkv.py",
+  "candidate_doc": "v001 -- SDPA + fused QKV projection.\n\nTwo changes over the baseline, both structural rather than hand-written kernels:\n\n  1. One [d_model -> 3*d_model] GEMM for Q/K/V instead of three separate ones.\n     At these shapes the projections are small and launch-bound, so collapsing\n     three kernel launches into one matters more than the FLOPs saved.\n  2. F.scaled_dot_product_attention instead of an explicit materialized score\n     matrix. This is the single change that makes case 14 possible at all --\n     the baseline's [B,H,S,S] fp32 buffer would need ~19 TiB there.\n\nPadding is folded into the causal mask only when a padding mask is actually\npresent; the all-valid case takes the is_causal fast path, which keeps the\nflash backend eligible instead of forcing a materialized mask.",
+  "dtype": "bfloat16",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-30T13:38:16",
+  "cases": [
+    {
+      "case": 1,
+      "shape": {
+        "case": 1,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 168.48147583007812
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 1109.6917724609375
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 5781.33642578125
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 3005981440.0
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 524287.0
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 26.397260665893555
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.015625,
+            "max_rel": 1.8278688192367554
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 103.42105102539062
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 36.184078216552734
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 29.841629028320312
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 3,
+      "shape": {
+        "case": 3,
+        "batch_size": 4,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 63.962162017822266
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.0234375,
+            "max_rel": 312.65216064453125
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 164.6571502685547
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.0390625,
+            "max_rel": 72.84615325927734
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 1837.3621826171875
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 4,
+      "shape": {
+        "case": 4,
+        "batch_size": 16,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.004,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 1690.0091552734375
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 36.16128921508789
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0546875,
+            "max_rel": 2080.187744140625
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 96.34131622314453
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 81.6135482788086
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 5,
+      "shape": {
+        "case": 5,
+        "batch_size": 128,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.031,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 3143310592.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 57935716.0
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 5401611264.0
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 1617.8421630859375
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 583.5505981445312
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 6,
+      "shape": {
+        "case": 6,
+        "batch_size": 10000,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 2.441,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.078125,
+            "max_rel": 5126952960.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 999450688.0
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.078125,
+            "max_rel": 15441894400.0
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.078125,
+            "max_rel": 6835937280.0
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.078125,
+            "max_rel": 2532958976.0
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 7,
+      "shape": {
+        "case": 7,
+        "batch_size": 64,
+        "d_model": 32,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 32
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 5340576256.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.0234375,
+            "max_rel": 14126301.0
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 566.7283935546875
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.0546875,
+            "max_rel": 1502990720.0
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.0390625,
+            "max_rel": 139.40650939941406
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 8,
+      "shape": {
+        "case": 8,
+        "batch_size": 64,
+        "d_model": 1024,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 1024
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 135571.328125
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 249.90040588378906
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.078125,
+            "max_rel": 2792358400.0
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 25627.255859375
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 3147.9267578125
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 9,
+      "shape": {
+        "case": 9,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 1,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.004,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 1416.84619140625
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 385.0
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 8117676032.0
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 3307.8623046875
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 1343.488525390625
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 10,
+      "shape": {
+        "case": 10,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 2,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.008,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.0546875,
+            "max_rel": 625610368.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 270.1703796386719
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 15136718848.0
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 778198272.0
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 1739501952.0
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 11,
+      "shape": {
+        "case": 11,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 16,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.062,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 1242.212158203125
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 130.76470947265625
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 5798340096.0
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 380.48236083984375
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 113.88888549804688
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 12,
+      "shape": {
+        "case": 12,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 32,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 239.24615478515625
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 205.5742645263672
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 2364.604248046875
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.0546875,
+            "max_rel": 2752.049072265625
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 306.1520080566406
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 13,
+      "shape": {
+        "case": 13,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 1024,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 1.0,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.0546875,
+            "max_rel": 5432129024.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.03125,
+            "max_rel": 20265580.0
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 6591796736.0
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.0625,
+            "max_rel": 2166748160.0
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.046875,
+            "max_rel": 3524780288.0
+          }
+        ]
+      },
+      "status": "incorrect"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_unchanged": true,
+  "failed_cases": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "n_scored": 0,
+  "geomean_speedup": 0.0,
+  "score": 0.0
+}

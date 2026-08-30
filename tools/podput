@@ -1,0 +1,21 @@
+#!/bin/bash
+# podput <local-file> <remote-path> — upload via chunked base64 over the proxy shell (no scp available).
+set -uo pipefail
+POD="${POD_SSH:-132yirw3l7rq7s-644121e6@ssh.runpod.io}"
+KEY="${POD_KEY:-$HOME/.ssh/id_ed25519}"
+LOCAL="$1"; REMOTE="$2"
+B64=$(base64 < "$LOCAL" | tr -d '\n')
+SUM=$(shasum -a 256 "$LOCAL" | awk '{print $1}')
+{
+  echo 'stty -echo 2>/dev/null'
+  echo "mkdir -p $(dirname "$REMOTE"); rm -f /tmp/_pp.b64"
+  echo "$B64" | fold -w 512 | while read -r c; do echo "printf '%s' '$c' >> /tmp/_pp.b64"; done
+  echo "base64 -d /tmp/_pp.b64 > '$REMOTE'"
+  echo "echo __PODRUN_BEGIN; sha256sum '$REMOTE' | awk '{print \$1}'; wc -c < '$REMOTE'; echo __PODRUN_END"
+  echo 'exit'
+} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o LogLevel=ERROR -tt "$POD" 2>&1 \
+  | tr -d '\r' | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' \
+  | awk '$0=="__PODRUN_BEGIN"{f=1;next} $0=="__PODRUN_END"{f=0} f' > /tmp/_pp_res.$$
+REMOTE_SUM=$(sed -n 1p /tmp/_pp_res.$$); REMOTE_LEN=$(sed -n 2p /tmp/_pp_res.$$); rm -f /tmp/_pp_res.$$
+if [ "$SUM" = "$REMOTE_SUM" ]; then echo "OK  $REMOTE  ($REMOTE_LEN bytes, sha256 verified)";
+else echo "MISMATCH  local=$SUM  remote=$REMOTE_SUM  len=$REMOTE_LEN"; exit 1; fi

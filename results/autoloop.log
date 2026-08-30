@@ -1,0 +1,8 @@
+[2026-08-30 15:03:37Z] start model=gpt-5.3-codex profile=auto incumbent=v001_sdpa_fused_qkv.py score=1.6982
+[2026-08-30 15:03:37Z] --- iteration 1/1 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 15:04:31Z] start model=gpt-5.3-codex profile=auto incumbent=v001_sdpa_fused_qkv.py score=1.6982
+[2026-08-30 15:04:31Z] --- iteration 1/1 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 15:04:39Z] wrote v004_remove_per_call_host.py
+[2026-08-30 15:04:39Z] dry-run: skipping evaluation
+[2026-08-30 15:04:39Z] stop: completed all iterations
+[2026-08-30 15:04:39Z] wrote results/STATUS.md

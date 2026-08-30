@@ -1,0 +1,18 @@
+case  1  ok               speedup=1.470  
+case  2  ok               speedup=1.614  
+case  3  ok               speedup=1.611  
+case  4  ok               speedup=1.596  
+case  5  ok               speedup=1.739  
+case  6  ok               speedup=1.823  
+case  7  ok               speedup=1.559  
+case  8  ok               speedup=1.110  
+case  9  ok               speedup=1.158  
+case 10  ok               speedup=1.354  
+case 11  ok               speedup=2.572  
+case 12  ok               speedup=1.660  
+case 13  ok               speedup=4.362  
+
+=== SUMMARY ===
+scored 13 cases | geomean 1.6982x | failed [] | env_unchanged True
+SCORE 1.6982
+__PODRUN_RC=0

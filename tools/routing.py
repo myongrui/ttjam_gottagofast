@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+"""Layer 1 -- deterministic routing. Free, runs every cycle, no model involved.
+
+Decides *what kind of move to make next*, which the portfolio search does not:
+that policy selects which candidate wins, but is silent on whether the next
+attempt should tune an existing structure or replace it. Everything here is
+arithmetic over the ledger and the roofline, so it costs nothing per cycle.
+
+Three rules, each implementing a specific criticism of the selection-only loop:
+
+  ROUTE   Autotuning moves a kernel toward the roofline it is already on; it
+          cannot move the roofline. Gap-to-SOL therefore decides tune vs
+          restructure, and gives a real stopping criterion instead of a guess.
+
+  WIDTH   A beam of 3 over 4 candidates is "keep everything" wearing a costume.
+          Beam and elite widths scale with the evidence actually available.
+
+  BIAS    Screening on a hypothesis-chosen profile selects for candidates that
+          suit that profile. We periodically force a neutral profile, and we
+          measure how often a screen win fails to survive the full sweep.
+"""
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import ledger
+import roofline
+from race import PROFILES
+
+ROOT = Path(__file__).resolve().parent.parent
+
+# A shape within this factor of speed-of-light has no tuning headroom left.
+SOL_DONE = 1.5
+# Beyond this, the constraint is latency/structure, not parameters.
+SOL_STRUCTURAL = 4.0
+# Force a neutral screening profile every N cycles to bound selection bias.
+NEUTRAL_EVERY = 3
+
+
+@dataclass
+class Decision:
+    mode: str                       # TUNE | STRUCTURAL | STOP
+    reason: str
+    profile: str = "general"
+    parent: Optional[str] = None
+    target_cases: List[str] = field(default_factory=list)
+    guidance: str = ""
+    beam_size: int = 1
+    elite_k: int = 1
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {"mode": self.mode, "reason": self.reason, "profile": self.profile,
+                "parent": self.parent, "target_cases": self.target_cases,
+                "beam_size": self.beam_size, "elite_k": self.elite_k}
+
+
+# --------------------------------------------------------------------------
+# WIDTH -- scale search width to the evidence available
+# --------------------------------------------------------------------------
+
+def adaptive_widths(n_eligible: int) -> tuple[int, int]:
+    """Beam and elite widths as a function of how many candidates exist.
+
+    With two or three candidates a width-3 beam retains everything, which is not
+    diversity -- it is an absence of selection pressure that costs real pod time
+    on parents that have already lost. Width grows only as the pool does.
+    """
+    if n_eligible <= 2:
+        beam = 1
+    elif n_eligible <= 5:
+        beam = 2
+    else:
+        beam = 3
+    elite_k = 1 if n_eligible < 6 else 2
+    return beam, elite_k
+
+
+# --------------------------------------------------------------------------
+# BIAS -- measure and bound screen-to-full divergence
+# --------------------------------------------------------------------------
+
+def screen_bias(entries: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    """How often a screen win fails to survive the full sweep.
+
+    Screening is what makes the loop affordable, so the goal is not to remove it
+    but to keep it honest. A candidate that screens `promote` and then fails the
+    13-case sweep is evidence the screen profile flattered it.
+    """
+    rows = entries if entries is not None else ledger.load()
+    by_candidate: Dict[str, Dict[str, str]] = {}
+    for e in rows:
+        decision = e.get("decision") or ""
+        slot = by_candidate.setdefault(e["candidate"], {})
+        if decision.startswith("screen_"):
+            slot["screen"] = decision[len("screen_"):]
+        elif ledger.case_set(e) == ledger.FULL_CASES:
+            slot["full"] = decision
+    confirmed = contradicted = 0
+    offenders = []
+    for name, slot in by_candidate.items():
+        if slot.get("screen") == "promote" and "full" in slot:
+            if slot["full"] == "promote":
+                confirmed += 1
+            else:
+                contradicted += 1
+                offenders.append(name)
+    total = confirmed + contradicted
+    return {"confirmed": confirmed, "contradicted": contradicted,
+            "rate": (contradicted / total) if total else 0.0,
+            "offenders": offenders}
+
+
+def choose_profile(target_cases: List[str], cycle: int) -> str:
+    """Smallest profile covering the targeted cases, with periodic neutrality."""
+    if cycle % NEUTRAL_EVERY == 0:
+        return "general"
+    if not target_cases:
+        return "general"
+    wanted = set(target_cases)
+    best, best_cover = "general", -1.0
+    for name, cases in PROFILES.items():
+        members = set(cases.split(","))
+        overlap = len(members & wanted)
+        if not overlap:
+            continue
+        # Prefer high overlap, then fewer cases (cheaper to run).
+        cover = overlap - 0.01 * len(members)
+        if cover > best_cover:
+            best, best_cover = name, cover
+    return best
+
+
+# --------------------------------------------------------------------------
+# ROUTE -- tune, restructure, or stop
+# --------------------------------------------------------------------------
+
+def plateau_length(entries: Optional[List[Dict[str, Any]]] = None) -> int:
+    """Consecutive full-sweep runs since the last promotion."""
+    rows = entries if entries is not None else ledger.load()
+    n = 0
+    for e in reversed(rows):
+        if ledger.case_set(e) != ledger.FULL_CASES:
+            continue
+        if e.get("decision") in ("promote", "bootstrap"):
+            break
+        n += 1
+    return n
+
+
+def champion_report(champ: Optional[Dict[str, Any]]) -> Optional[Path]:
+    """Locate the incumbent's full-sweep report by content, not by filename.
+
+    Reports written by hand carry arbitrary names, so matching on the embedded
+    candidate field and the full case set is the only reliable lookup.
+    """
+    if not champ:
+        return None
+    want = champ["candidate"]
+    newest, newest_mtime = None, -1.0
+    for path in (ROOT / "results").glob("*.json"):
+        try:
+            with path.open() as f:
+                r = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            continue
+        if r.get("candidate") != want:
+            continue
+        cases = ",".join(str(c["case"]) for c in r.get("cases", []))
+        if cases != ledger.FULL_CASES:
+            continue
+        mtime = path.stat().st_mtime
+        if mtime > newest_mtime:
+            newest, newest_mtime = path, mtime
+    return newest
+
+
+def decide(cycle: int, dtype: str = "float32",
+           plateau_limit: int = 3) -> Decision:
+    entries = ledger.load()
+    champ = ledger.champion(ledger.FULL_CASES, dtype=dtype)
+    eligible = [e for e in entries
+                if e.get("score", 0) > 0 and ledger.globally_eligible(e)]
+    beam, elite_k = adaptive_widths(len(eligible))
+
+    if champ is None:
+        return Decision("STRUCTURAL", "no incumbent yet; establish one",
+                        profile="general", beam_size=beam, elite_k=elite_k,
+                        guidance="No champion exists. Propose a straightforward, "
+                                 "correct optimization to establish a baseline.")
+
+    report = champion_report(champ)
+    if report is None:
+        return Decision("STRUCTURAL", "no full report for the incumbent",
+                        profile="general", parent=champ["candidate"],
+                        beam_size=beam, elite_k=elite_k)
+
+    gaps = roofline.gaps(report)
+    done = [c for c, v in gaps.items() if v[2] < SOL_DONE]
+    tunable = {c: v for c, v in gaps.items() if SOL_DONE <= v[2] < SOL_STRUCTURAL}
+    structural = {c: v for c, v in gaps.items() if v[2] >= SOL_STRUCTURAL}
+    stalled = plateau_length(entries)
+
+    if len(done) == len(gaps):
+        return Decision("STOP", "every shape is within 1.5x of speed-of-light",
+                        parent=champ["candidate"], beam_size=beam, elite_k=elite_k)
+
+    if structural:
+        # Target the worst offenders; those have the most headroom on the table.
+        worst = sorted(structural.items(), key=lambda kv: -kv[1][2])[:3]
+        targets = [c for c, _ in worst]
+        detail = ", ".join(f"case {c} {v[2]:.0f}x off SOL ({v[3]}-bound)"
+                           for c, v in worst)
+        reason = f"{len(structural)}/{len(gaps)} shapes >{SOL_STRUCTURAL}x off SOL"
+        if stalled >= plateau_limit:
+            reason += f"; {stalled} runs without promotion"
+        return Decision(
+            "STRUCTURAL", reason,
+            profile=choose_profile(targets, cycle), parent=champ["candidate"],
+            target_cases=targets, beam_size=beam, elite_k=elite_k,
+            guidance=(
+                f"These shapes are latency-bound, not parameter-bound: {detail}. "
+                "Neither bandwidth nor FLOPs is the constraint, so tile sizes and "
+                "block dimensions will not help. Propose a STRUCTURAL change: "
+                "eliminate kernel launches, fuse adjacent operations, remove "
+                "host-device synchronization, or replace the algorithm."))
+
+    worst = sorted(tunable.items(), key=lambda kv: -kv[1][2])[:3]
+    targets = [c for c, _ in worst]
+    return Decision(
+        "TUNE", f"{len(tunable)} shapes within {SOL_STRUCTURAL}x of SOL",
+        profile=choose_profile(targets, cycle), parent=champ["candidate"],
+        target_cases=targets, beam_size=beam, elite_k=elite_k,
+        guidance=("These shapes are close to their roofline; the structure is "
+                  "right and the parameters are not. Propose a TUNING change: "
+                  "block sizes, num_warps, num_stages, vectorization, or "
+                  "occupancy -- not a new algorithm."))
+
+
+if __name__ == "__main__":
+    import sys
+    d = decide(cycle=int(sys.argv[1]) if len(sys.argv) > 1 else 1)
+    print(json.dumps(d.as_dict(), indent=2))
+    print("\nguidance:", d.guidance)
+    print("\nscreen bias:", json.dumps(screen_bias(), indent=2))

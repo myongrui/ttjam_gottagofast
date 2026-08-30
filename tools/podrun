@@ -1,0 +1,26 @@
+#!/bin/bash
+# podrun — run a command/script on the RunPod pod over the interactive-only SSH proxy.
+#   podrun 'nvidia-smi'            run a command string
+#   podrun -f script.sh            run a local script file
+# The proxy gives an interactive shell only (no ssh exec, no scp), so we feed an
+# interactive bash over stdin: disable echo, reassemble a base64 payload in
+# <4096-byte chunks (PTY canonical-mode line limit), run it, print between markers.
+set -uo pipefail
+POD="${POD_SSH:-132yirw3l7rq7s-644121e6@ssh.runpod.io}"
+KEY="${POD_KEY:-$HOME/.ssh/id_ed25519}"
+
+if [ "${1:-}" = "-f" ]; then PAYLOAD=$(cat "$2"); else PAYLOAD="${1:-}"; fi
+B64=$(printf '%s' "$PAYLOAD" | base64 | tr -d '\n')
+
+{
+  echo 'stty -echo 2>/dev/null'
+  echo 'rm -f /tmp/_pr.b64'
+  # 512-char chunks keep each PTY line far under the canonical-mode limit
+  echo "$B64" | fold -w 512 | while read -r c; do echo "printf '%s' '$c' >> /tmp/_pr.b64"; done
+  echo 'base64 -d /tmp/_pr.b64 > /tmp/_pr.sh 2>/dev/null || base64 --decode /tmp/_pr.b64 > /tmp/_pr.sh'
+  echo 'bash /tmp/_pr.sh > /tmp/_pr.out 2>&1; echo "__PODRUN_RC=$?" >> /tmp/_pr.out'
+  echo 'echo __PODRUN_BEGIN; cat /tmp/_pr.out; echo __PODRUN_END'
+  echo 'exit'
+} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o LogLevel=ERROR -tt "$POD" 2>&1 \
+  | tr -d '\r' | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' \
+  | awk '$0=="__PODRUN_BEGIN"{f=1;next} $0=="__PODRUN_END"{f=0} f'

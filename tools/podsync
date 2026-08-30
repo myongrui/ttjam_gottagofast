@@ -1,0 +1,31 @@
+#!/bin/bash
+# podsync <remote-dir> <local-file>... — upload many files in ONE ssh session.
+# The proxy tolerates few connections poorly and each session costs ~10s, so we
+# tar + base64 the whole set, ship it as chunked lines, and unpack remotely.
+set -uo pipefail
+POD="${POD_SSH:-132yirw3l7rq7s-644121e6@ssh.runpod.io}"
+KEY="${POD_KEY:-$HOME/.ssh/id_ed25519}"
+REMOTE_DIR="$1"; shift
+TAR=$(mktemp /tmp/podsync.XXXXXX.tgz)
+COPYFILE_DISABLE=1 tar --no-xattrs -czf "$TAR" "$@" 2>/dev/null
+B64=$(base64 < "$TAR" | tr -d '\n')
+SUM=$(shasum -a 256 "$TAR" | awk '{print $1}')
+NCHUNK=$(( ${#B64} / 512 + 1 ))
+echo "sending $# file(s), $(wc -c < "$TAR") bytes tarred, $NCHUNK chunks"
+{
+  echo 'stty -echo 2>/dev/null'
+  echo "mkdir -p '$REMOTE_DIR'; rm -f /tmp/_ps.b64 /tmp/_ps.tgz"
+  echo "$B64" | fold -w 512 | while read -r c; do echo "printf '%s' '$c' >> /tmp/_ps.b64"; done
+  echo "base64 -d /tmp/_ps.b64 > /tmp/_ps.tgz"
+  echo "echo __PODRUN_BEGIN; sha256sum /tmp/_ps.tgz | awk '{print \$1}'; tar xzf /tmp/_ps.tgz -C '$REMOTE_DIR' 2>/dev/null && echo UNPACK_OK || echo UNPACK_FAIL; echo __PODRUN_END"
+  echo 'exit'
+} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o LogLevel=ERROR -tt "$POD" 2>&1 \
+  | tr -d '\r' | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' \
+  | awk '$0=="__PODRUN_BEGIN"{f=1;next} $0=="__PODRUN_END"{f=0} f' > /tmp/_ps_res.$$
+REMOTE_SUM=$(sed -n 1p /tmp/_ps_res.$$); UNPACK=$(sed -n 2p /tmp/_ps_res.$$)
+rm -f /tmp/_ps_res.$$ "$TAR"
+if [ "$SUM" = "$REMOTE_SUM" ] && [ "$UNPACK" = "UNPACK_OK" ]; then
+  echo "OK  synced to $REMOTE_DIR (sha256 verified, unpacked)"
+else
+  echo "FAIL  local=$SUM remote=$REMOTE_SUM unpack=$UNPACK"; exit 1
+fi
