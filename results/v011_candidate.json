@@ -1,0 +1,395 @@
+{
+  "candidate": "v011_candidate.py",
+  "candidate_doc": "Hypothesis: pipeline adjacent residual-add and LayerNorm operations across\ntransformer block boundaries, and implement each residual-plus-normalization as\none Triton kernel.\n\nMechanism: after attention, the residual result is needed both by the FFN\nresidual path and by norm2; after the FFN, it is needed both as the next block's\nresidual state and as that next block's norm1 input.  The fused kernel writes\nthe residual state while simultaneously computing its LayerNorm output, removing\none standalone residual-add launch and one standalone LayerNorm launch at each\nsuch boundary.  The first norm1 remains standalone; every later norm1 is fused\nwith the preceding FFN residual, and final_norm is fused with the final FFN\nresidual.",
+  "incumbent": "v001_sdpa_fused_qkv.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-30T16:01:24",
+  "cases": [
+    {
+      "case": 1,
+      "shape": {
+        "case": 1,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 1.430511474609375e-06,
+            "max_rel": 0.06347157061100006
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.018957296386361122
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 3.375113010406494e-06,
+            "max_rel": 0.5911608934402466
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 1.1920928955078125e-06,
+            "max_rel": 0.05395672470331192
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.07692299783229828
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 1.9640320539474487,
+        "mean_ms": 2.0119779613282947,
+        "min_ms": 1.9374079704284668,
+        "wall_ms": 1.968594950934251,
+        "n": 90,
+        "round_medians_ms": [
+          1.9645439982414246,
+          1.9650560021400452,
+          1.9630080461502075
+        ]
+      },
+      "peak_mem_gib": 0.079,
+      "baseline": {
+        "median_ms": 2.628607988357544,
+        "mean_ms": 2.6331932279798718,
+        "min_ms": 2.614272117614746,
+        "wall_ms": 2.6344999050100646,
+        "n": 90,
+        "round_medians_ms": [
+          2.623487949371338,
+          2.629631996154785,
+          2.6301440000534058
+        ]
+      },
+      "speedup": 1.338373262836716,
+      "speedup_wall": 1.3382640770056786,
+      "paired_speedup": 1.3378217986845424,
+      "paired_speedup_ci95": [
+        1.3354182709675995,
+        1.339853906972804
+      ],
+      "round_speedups": [
+        1.3354182709675995,
+        1.3381969741783355,
+        1.339853906972804
+      ],
+      "wall_to_event_ratio": 1.002,
+      "stream_ok": true,
+      "status": "ok",
+      "incumbent": {
+        "median_ms": 1.7904640436172485,
+        "mean_ms": 1.7963463160726758,
+        "min_ms": 1.7612799406051636,
+        "wall_ms": 1.8254316101471584,
+        "n": 90,
+        "round_medians_ms": [
+          1.7843199968338013,
+          1.7909760475158691,
+          1.795583963394165
+        ]
+      },
+      "vs_incumbent": {
+        "speedup": 0.9116266916411313,
+        "speedup_wall": 0.9272763852619095,
+        "paired_speedup": 0.9114576386418685,
+        "paired_speedup_ci95": [
+          0.9082616619587283,
+          0.9147104449804015
+        ],
+        "round_speedups": [
+          0.9082616619587283,
+          0.9114122170388049,
+          0.9147104449804015
+        ]
+      }
+    },
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.0005010020104236901
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 4.76837158203125e-07,
+            "max_rel": 0.0015818014508113265
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 2.1457672119140625e-06,
+            "max_rel": 0.014474396593868732
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.0011642321478575468
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 7.152557373046875e-07,
+            "max_rel": 0.0001612890773685649
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 1.9297280311584473,
+        "mean_ms": 1.9784817841317919,
+        "min_ms": 1.9189759492874146,
+        "wall_ms": 1.8919565404454868,
+        "n": 90,
+        "round_medians_ms": [
+          1.931264042854309,
+          1.9307520389556885,
+          1.9266560077667236
+        ]
+      },
+      "peak_mem_gib": 0.016,
+      "baseline": {
+        "median_ms": 2.309119939804077,
+        "mean_ms": 2.3177898512946236,
+        "min_ms": 2.2906880378723145,
+        "wall_ms": 2.2563829397161803,
+        "n": 90,
+        "round_medians_ms": [
+          2.3127039670944214,
+          2.309119939804077,
+          2.3050239086151123
+        ]
+      },
+      "speedup": 1.196603823191538,
+      "speedup_wall": 1.19261880042175,
+      "paired_speedup": 1.1966207914052418,
+      "paired_speedup_ci95": [
+        1.1959691836208246,
+        1.1975079097296109
+      ],
+      "round_speedups": [
+        1.1975079097296109,
+        1.1959691836208246,
+        1.1963858100891465
+      ],
+      "wall_to_event_ratio": 0.98,
+      "stream_ok": true,
+      "status": "ok",
+      "incumbent": {
+        "median_ms": 1.427456021308899,
+        "mean_ms": 1.4309944815105862,
+        "min_ms": 1.4161920547485352,
+        "wall_ms": 1.3846895347038906,
+        "n": 90,
+        "round_medians_ms": [
+          1.4315520524978638,
+          1.4238719940185547,
+          1.430016040802002
+        ]
+      },
+      "vs_incumbent": {
+        "speedup": 0.7397187573898555,
+        "speedup_wall": 0.731882316058828,
+        "paired_speedup": 0.7403133045772711,
+        "paired_speedup_ci95": [
+          0.7374701490869346,
+          0.7422269647707376
+        ],
+        "round_speedups": [
+          0.741251336291698,
+          0.7374701490869346,
+          0.7422269647707376
+        ]
+      }
+    },
+    {
+      "case": 12,
+      "shape": {
+        "case": 12,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 32,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 1.430511474609375e-06,
+            "max_rel": 0.01157414074987173
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.0029607247561216354
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 2.1457672119140625e-06,
+            "max_rel": 0.1464698761701584
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 1.430511474609375e-06,
+            "max_rel": 0.005750755313783884
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.057803377509117126
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 1.9445760250091553,
+        "mean_ms": 1.9622684412532383,
+        "min_ms": 1.926144003868103,
+        "wall_ms": 1.905134692788124,
+        "n": 90,
+        "round_medians_ms": [
+          1.9993599653244019,
+          1.935871958732605,
+          1.9450880289077759
+        ]
+      },
+      "peak_mem_gib": 0.027,
+      "baseline": {
+        "median_ms": 2.3019518852233887,
+        "mean_ms": 2.345938499768575,
+        "min_ms": 2.2855679988861084,
+        "wall_ms": 2.26308008035024,
+        "n": 90,
+        "round_medians_ms": [
+          2.3930879831314087,
+          2.3009281158447266,
+          2.2958080768585205
+        ]
+      },
+      "speedup": 1.1837808630868782,
+      "speedup_wall": 1.1878845568857237,
+      "paired_speedup": 1.1885847073358249,
+      "paired_speedup_ci95": [
+        1.1803106300272097,
+        1.1969270289670542
+      ],
+      "round_speedups": [
+        1.1969270289670542,
+        1.18857453638159,
+        1.1803106300272097
+      ],
+      "wall_to_event_ratio": 0.98,
+      "stream_ok": true,
+      "status": "ok",
+      "incumbent": {
+        "median_ms": 1.4458880424499512,
+        "mean_ms": 1.4497564487987094,
+        "min_ms": 1.4295040369033813,
+        "wall_ms": 1.392748827735583,
+        "n": 90,
+        "round_medians_ms": [
+          1.4515199661254883,
+          1.4464000463485718,
+          1.4392319917678833
+        ]
+      },
+      "vs_incumbent": {
+        "speedup": 0.7435492487073854,
+        "speedup_wall": 0.731050058039374,
+        "paired_speedup": 0.7376411243874476,
+        "paired_speedup_ci95": [
+          0.7259923131900738,
+          0.7471568766849201
+        ],
+        "round_speedups": [
+          0.7259923131900738,
+          0.7471568766849201,
+          0.7399315457080132
+        ]
+      }
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_unchanged": true,
+  "failed_cases": [],
+  "n_scored": 3,
+  "geomean_speedup": 1.2376551434018903,
+  "score": 1.2376551434018903,
+  "incumbent_comparison": {
+    "incumbent": "v001_sdpa_fused_qkv.py",
+    "n_cases": 3,
+    "round_geomeans": [
+      0.7877156939927766,
+      0.7948594890362396,
+      0.7949454046168221
+    ],
+    "paired_geomean": 0.7924996057623033,
+    "paired_geomean_ci95": [
+      0.7877156939927766,
+      0.7949454046168221
+    ],
+    "promotion_margin": 0.02,
+    "decision": "reject"
+  }
+}

@@ -46,3 +46,7 @@
 [2026-08-30 15:59:03Z] --- iteration 3/120 --- route=STRUCTURAL profile=general parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 15:59:48Z] wrote v010_hypothesis_the_attention_output.py
 [2026-08-30 16:00:17Z] no improvement (champion still 1.6982), flat=3
+[2026-08-30 16:00:20Z] pushed: iteration 3 — v010_hypothesis_the_attention_output.py rejected, champion 1.6982
+[2026-08-30 16:00:24Z] --- iteration 4/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 16:01:09Z] wrote v011_candidate.py
+[2026-08-30 16:01:34Z] no improvement (champion still 1.6982), flat=4
