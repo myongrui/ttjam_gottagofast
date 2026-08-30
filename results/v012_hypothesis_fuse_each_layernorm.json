@@ -1,0 +1,86 @@
+{
+  "candidate": "v012_hypothesis_fuse_each_layernorm.py",
+  "candidate_doc": "Hypothesis: fuse each LayerNorm directly into the following projection, while\nalso folding the preceding residual add into that same kernel when possible.\n\nMechanism: the normal transformer path materializes normalized activations after\nevery residual/LN pair, then launches a separate GEMM for QKV or FFN input.\nThis candidate uses one Triton kernel that computes residual + LayerNorm and\nimmediately performs the small projection tile. For layers after the first, the\nkernel consumes the prior residual and FFN output together, writes the new\nresidual once, and produces QKV without materializing the normalized tensor.\nThe attention-to-FFN transition uses the same residual+LN+FFN-input fusion.\nThis removes several latency-dominant launches and intermediate writes on the\nsmall d_model=128 cases while retaining SDPA for feasible causal attention.",
+  "incumbent": "v001_sdpa_fused_qkv.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-30T16:02:50",
+  "cases": [
+    {
+      "case": 1,
+      "shape": {
+        "case": 1,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.016,
+      "status": "runtime_error",
+      "error": "CompilationError: at 50:13:\n    inv_std = tl.rsqrt(var + EPS)\n\n    gamma = tl.load(gamma_ptr + ks, mask=k_mask, other=0.0)\n    beta = tl.load(beta_ptr + ks, mask=k_mask, other=0.0)\n    normed = centered * inv_std[:, None] * gamma[None, :] + beta[None, :]\n\n    w = tl.load(\n        weight_ptr + ns[:, None] * K + ks[None, :],\n        mask=(ns[:, None] < N) & k_mask[None, :],\n        other=0.0,\n    )\n    result = tl.dot(normed, tl.trans(w), input_precision=\"tf32\")\n             ^",
+      "traceback": "3.12/dist-packages/triton/runtime/jit.py\", line 390, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 594, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 339, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 83, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 50:13:\n    inv_std = tl.rsqrt(var + EPS)\n\n    gamma = tl.load(gamma_ptr + ks, mask=k_mask, other=0.0)\n    beta = tl.load(beta_ptr + ks, mask=k_mask, other=0.0)\n    normed = centered * inv_std[:, None] * gamma[None, :] + beta[None, :]\n\n    w = tl.load(\n        weight_ptr + ns[:, None] * K + ks[None, :],\n        mask=(ns[:, None] < N) & k_mask[None, :],\n        other=0.0,\n    )\n    result = tl.dot(normed, tl.trans(w), input_precision=\"tf32\")\n             ^\n"
+    },
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "status": "runtime_error",
+      "error": "CompilationError: at 50:13:\n    inv_std = tl.rsqrt(var + EPS)\n\n    gamma = tl.load(gamma_ptr + ks, mask=k_mask, other=0.0)\n    beta = tl.load(beta_ptr + ks, mask=k_mask, other=0.0)\n    normed = centered * inv_std[:, None] * gamma[None, :] + beta[None, :]\n\n    w = tl.load(\n        weight_ptr + ns[:, None] * K + ks[None, :],\n        mask=(ns[:, None] < N) & k_mask[None, :],\n        other=0.0,\n    )\n    result = tl.dot(normed, tl.trans(w), input_precision=\"tf32\")\n             ^",
+      "traceback": "3.12/dist-packages/triton/runtime/jit.py\", line 390, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 594, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 339, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 83, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 50:13:\n    inv_std = tl.rsqrt(var + EPS)\n\n    gamma = tl.load(gamma_ptr + ks, mask=k_mask, other=0.0)\n    beta = tl.load(beta_ptr + ks, mask=k_mask, other=0.0)\n    normed = centered * inv_std[:, None] * gamma[None, :] + beta[None, :]\n\n    w = tl.load(\n        weight_ptr + ns[:, None] * K + ks[None, :],\n        mask=(ns[:, None] < N) & k_mask[None, :],\n        other=0.0,\n    )\n    result = tl.dot(normed, tl.trans(w), input_precision=\"tf32\")\n             ^\n"
+    },
+    {
+      "case": 12,
+      "shape": {
+        "case": 12,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 32,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "status": "runtime_error",
+      "error": "CompilationError: at 50:13:\n    inv_std = tl.rsqrt(var + EPS)\n\n    gamma = tl.load(gamma_ptr + ks, mask=k_mask, other=0.0)\n    beta = tl.load(beta_ptr + ks, mask=k_mask, other=0.0)\n    normed = centered * inv_std[:, None] * gamma[None, :] + beta[None, :]\n\n    w = tl.load(\n        weight_ptr + ns[:, None] * K + ks[None, :],\n        mask=(ns[:, None] < N) & k_mask[None, :],\n        other=0.0,\n    )\n    result = tl.dot(normed, tl.trans(w), input_precision=\"tf32\")\n             ^",
+      "traceback": "3.12/dist-packages/triton/runtime/jit.py\", line 390, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 594, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 339, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 83, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 50:13:\n    inv_std = tl.rsqrt(var + EPS)\n\n    gamma = tl.load(gamma_ptr + ks, mask=k_mask, other=0.0)\n    beta = tl.load(beta_ptr + ks, mask=k_mask, other=0.0)\n    normed = centered * inv_std[:, None] * gamma[None, :] + beta[None, :]\n\n    w = tl.load(\n        weight_ptr + ns[:, None] * K + ks[None, :],\n        mask=(ns[:, None] < N) & k_mask[None, :],\n        other=0.0,\n    )\n    result = tl.dot(normed, tl.trans(w), input_precision=\"tf32\")\n             ^\n"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_unchanged": true,
+  "failed_cases": [
+    1,
+    2,
+    12
+  ],
+  "n_scored": 0,
+  "geomean_speedup": 0.0,
+  "score": 0.0
+}

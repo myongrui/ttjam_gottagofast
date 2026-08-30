@@ -50,3 +50,7 @@
 [2026-08-30 16:00:24Z] --- iteration 4/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 16:01:09Z] wrote v011_candidate.py
 [2026-08-30 16:01:34Z] no improvement (champion still 1.6982), flat=4
+[2026-08-30 16:01:37Z] pushed: iteration 4 — v011_candidate.py rejected, champion 1.6982
+[2026-08-30 16:01:42Z] --- iteration 5/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 16:02:34Z] wrote v012_hypothesis_fuse_each_layernorm.py
+[2026-08-30 16:02:57Z] no improvement (champion still 1.6982), flat=5
