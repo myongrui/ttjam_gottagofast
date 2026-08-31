@@ -168,6 +168,51 @@ def push_results(reason: str) -> bool:
         return False
 
 
+def pod_status() -> dict:
+    """Current pod record, or {} if it cannot be read."""
+    key = os.environ.get("RUNPOD_API_KEY")
+    pod = os.environ.get("RUNPOD_POD_ID", "")
+    if not key or not pod:
+        return {}
+    req = urllib.request.Request(
+        "https://api.runpod.io/v2/pods",
+        headers={"Authorization": f"Bearer {key}", "User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            for record in json.load(resp).get("pods", []):
+                if record.get("id") == pod:
+                    return record
+    except Exception:
+        pass
+    return {}
+
+
+def ensure_pod(attempts: int = 3) -> bool:
+    """Guarantee a reachable pod, starting it if necessary.
+
+    Called before every evaluation rather than once at launch. Pods on this
+    account have repeatedly stopped mid-session -- four times across both
+    community and secure clouds -- and previously that ended the whole run.
+    Recovering costs one start and a boot wait; aborting costs the rest of the
+    night's work.
+    """
+    for attempt in range(1, attempts + 1):
+        if wait_for_pod(attempts=1, delay=0):
+            return True
+        record = pod_status()
+        state = record.get("desiredStatus") or record.get("status") or "unknown"
+        log(f"pod not reachable (status={state}); recovery attempt "
+            f"{attempt}/{attempts}")
+        if state != "RUNNING" and not pod_action("start"):
+            # A capacity refusal will not resolve by retrying immediately.
+            log("  start refused; the host may have no free GPU")
+            time.sleep(30)
+            continue
+        if wait_for_pod(attempts=18, delay=10):
+            return True
+    return False
+
+
 def wait_for_pod(attempts: int = 30, delay: int = 10) -> bool:
     """Poll until the pod answers over ssh, or give up.
 
@@ -458,19 +503,23 @@ def main() -> int:
     p.add_argument("--model", default=None,
                    help="defaults to $OPENAI_MODEL (or .env); no built-in "
                         "fallback, since a guessed model id fails at the API")
-    p.add_argument("--start-pod", action="store_true",
-                   help="start the pod at launch and wait for ssh. With "
-                        "--stop-pod this makes the run self-contained: no "
-                        "manual RunPod step at either end")
+    p.add_argument("--no-start-pod", dest="start_pod", action="store_false",
+                   help="do NOT bring the pod up. By default the loop starts "
+                        "and recovers the pod itself, since a loop that cannot "
+                        "reach its GPU cannot do anything at all")
+    p.set_defaults(start_pod=True)
     p.add_argument("--push-results", action="store_true",
                    help="commit and push results/ and candidates/ on exit. "
                         "Required for a scheduled cloud agent to see current "
                         "state: it clones the repo and cannot read this machine")
     p.add_argument("--stop-pod", action="store_true",
-                   help="stop the pod when the loop exits, for any reason. "
-                        "Strongly recommended for unattended runs: otherwise a "
-                        "stall at 01:00 bills until you notice. Requires "
-                        "RUNPOD_API_KEY. Never terminates, so /workspace is safe")
+                   help="stop the pod when the loop exits. NOT the default, and "
+                        "not symmetric with starting: a stopped pod releases its "
+                        "GPU to the host and may be unable to restart when that "
+                        "GPU is scarce (\"not enough free GPUs on the host "
+                        "machine\"). Use for genuinely unattended overnight runs "
+                        "where an idle bill costs more than losing the card; "
+                        "leave it off while iterating. Never terminates.")
     p.add_argument("--tune-cases", default="1,2,12",
                    help="shapes the mechanical sweep measures configs on")
     p.add_argument("--eval-timeout", type=int, default=2400,
@@ -492,14 +541,9 @@ def main() -> int:
             "    | python3 -c \"import json,sys; print('\\n'.join("
             "sorted(m['id'] for m in json.load(sys.stdin)['data'])))\"")
 
-    if args.start_pod and not args.dry_run:
-        if not pod_action("start"):
-            raise SystemExit("could not start the pod; aborting before spending "
-                             "anything on generation")
-        if not wait_for_pod():
-            log("pod started but never answered ssh; stopping it again")
-            pod_action("stop")
-            raise SystemExit("pod did not become reachable")
+    if args.start_pod and not args.dry_run and not ensure_pod():
+        raise SystemExit("could not bring up a reachable pod; aborting before "
+                         "spending anything on generation")
 
     deadline = time.time() + args.max_hours * 3600
     best = ledger.champion(ledger.FULL_CASES, dtype=args.dtype)

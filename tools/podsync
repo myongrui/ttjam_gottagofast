@@ -3,7 +3,7 @@
 # The proxy tolerates few connections poorly and each session costs ~10s, so we
 # tar + base64 the whole set, ship it as chunked lines, and unpack remotely.
 set -uo pipefail
-POD="${POD_SSH:-2v992jh5vuhb6r-64410cc2@ssh.runpod.io}"
+POD="${POD_SSH:-132yirw3l7rq7s-644121e6@ssh.runpod.io}"
 KEY="${POD_KEY:-$HOME/.ssh/id_ed25519}"
 REMOTE_DIR="$1"; shift
 TAR=$(mktemp /tmp/podsync.XXXXXX.tgz)

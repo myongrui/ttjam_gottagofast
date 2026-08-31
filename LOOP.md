@@ -187,7 +187,17 @@ non-improvements, or an unreachable pod. It does **not** start the pod; a dead
 pod ends the run rather than recording candidates as failures.
 
 
-### Pod lifecycle caveat: `--stop-pod` can cost you the GPU
+### Pod lifecycle
+
+Starting is automatic. `ensure_pod()` runs before every evaluation, not just at
+launch: it probes ssh, starts the pod when it is down, and waits for the boot.
+Pods on this account have stopped mid-session four times across both community
+and secure clouds, and recovering costs one start where aborting costs the rest
+of the run. `--no-start-pod` opts out.
+
+Stopping is **not** symmetric and is therefore still opt-in.
+
+### Why `--stop-pod` can cost you the GPU
 
 A stopped Runpod pod stays bound to its original host, and its GPU is released
 to other users. Restarting only succeeds if that specific machine still has a
