@@ -328,3 +328,15 @@
 [2026-08-31 04:46:32Z] pod start failed: HTTP 400 {"detail":"There are not enough free GPUs on the host machine to start this pod.","status":400,"title":"Bad Request"}
 
 [2026-08-31 04:47:52Z] pod ready after 1 probe(s)
+[2026-08-31 05:01:37Z] pod 2v992jh5vuhb6r: start requested
+[2026-08-31 05:01:40Z] pod ready after 1 probe(s)
+[2026-08-31 05:01:41Z] start model=gpt-5.6-sol effort=high profile=auto incumbent=v024_centralized_attention_mask_dispatch.py score=2.0916
+[2026-08-31 05:01:44Z] --- iteration 1/20 --- route=STRUCTURAL profile=launch parent=v024_centralized_attention_mask_dispatch.py beam=3 flat=0 best=2.0916 elapsed=0.0h (13/13 shapes >4.0x off SOL; 3 runs without promotion)
+[2026-08-31 05:01:44Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 942x off SOL (memory-bound), case 3 430x off SOL (compute-bound), case 7 238x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 05:01:44Z]   asking the model for a candidate...
+[2026-08-31 05:02:35Z] wrote v038_torchscript_dispatched_transformer_candidate.py (206 lines)
+[2026-08-31 05:02:35Z]   hypothesis: TorchScript-dispatched transformer candidate.
+[2026-08-31 05:02:35Z] evaluating v038_torchscript_dispatched_transformer_candidate.py on profile=launch (timeout 40m)
+[2026-08-31 05:05:11Z] evaluation finished in 156s (rc=0)
+[2026-08-31 05:05:11Z] IMPROVED 2.0916 -> 2.2969 (v038_torchscript_dispatched_transformer_candidate.py)
+[2026-08-31 05:05:11Z] iteration 1 took 207s
