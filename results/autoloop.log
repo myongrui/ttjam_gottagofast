@@ -390,3 +390,6 @@
 [2026-08-31 05:25:55Z] evaluation finished in 132s (rc=0)
 [2026-08-31 05:25:55Z] no improvement (champion still 2.2969), flat=5
 [2026-08-31 05:25:55Z] iteration 6 took 316s
+[2026-08-31 05:25:59Z] pushed: iteration 6 — v043_shape_dispatched_native_encoder.py rejected, champion 2.2969
+[2026-08-31 05:25:59Z] stop: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
+[2026-08-31 05:25:59Z] wrote results/STATUS.md

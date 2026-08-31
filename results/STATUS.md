@@ -1,27 +1,27 @@
 # autoloop stopped
 
 - **reason**: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
-- **iterations run**: 5
-- **best full-sweep score**: 2.0916
-- **stopped at**: 2026-08-31 03:50:17Z
+- **iterations run**: 6
+- **best full-sweep score**: 2.2969
+- **stopped at**: 2026-08-31 05:25:59Z
 - **last routing mode**: STRUCTURAL — 13/13 shapes >4.0x off SOL
-- **profile**: launch   **parent**: v024_centralized_attention_mask_dispatch.py
+- **profile**: general   **parent**: v038_torchscript_dispatched_transformer_candidate.py
 - **beam/elite width**: 3/2
-- **screen-to-full contradiction rate**: 25% (1 of 4) — offenders: v007_fuse_every_residual_add.py
+- **screen-to-full contradiction rate**: 20% (1 of 5) — offenders: v007_fuse_every_residual_add.py
 
 ## Recent attempts
 
 | candidate | score | decision | hypothesis |
 |---|---:|---|---|
-| v029_hypothesis_fusing_the_final.py | 1.9973 | screen_uncertain |  |
-| v029_hypothesis_fusing_the_final.py | 2.0739 | uncertain |  |
-| v030_native_multi_head_attention.py | 2.2870 | screen_uncertain | Native multi-head-attention fast-path candidate. |
-| v030_native_multi_head_attention.py | 2.0716 | uncertain | Native multi-head-attention fast-path candidate. |
-| v031_native_mha_unmasked_attention.py | 1.9509 | screen_reject | Native-MHA unmasked attention candidate. |
-| v032_final_layernorm_plus_padding.py | 0.0000 | invalid |  |
+| v040_frozen_torchscript_transformer_candidate.py | 2.4975 | screen_uncertain | Frozen TorchScript transformer candidate. |
+| v040_frozen_torchscript_transformer_candidate.py | 2.3261 | uncertain | Frozen TorchScript transformer candidate. |
+| v041_single_token_attention_specialization.py | 2.5818 | screen_reject | Single-token attention specialization. |
+| v041_single_token_attention_specialization.py | 2.2982 | uncertain | Single-token attention specialization. |
+| v042_torchscript_dispatched_native_encoder.py | 0.0000 | invalid | TorchScript-dispatched native encoder-layer candidate. |
+| v043_shape_dispatched_native_encoder.py | 2.3280 | screen_reject | Shape-dispatched native-encoder transformer. |
 
 ## Resume
 
 ```
-autoloop stopped: 5 consecutive non-improvements -- the search has stalled and needs a structural idea. Best 2.0916 after 5 iterations. Read results/STATUS.md, results/ledger.jsonl and LOOP.md, diagnose the stall, and propose the next candidate.
+autoloop stopped: 5 consecutive non-improvements -- the search has stalled and needs a structural idea. Best 2.2969 after 6 iterations. Read results/STATUS.md, results/ledger.jsonl and LOOP.md, diagnose the stall, and propose the next candidate.
 ```
