@@ -229,3 +229,13 @@
 [2026-08-31 03:37:39Z] evaluation finished in 26s (rc=0)
 [2026-08-31 03:37:39Z] no improvement (champion still 2.0916), flat=1
 [2026-08-31 03:37:39Z] iteration 1 took 65s
+[2026-08-31 03:37:42Z] pushed: iteration 1 — v028_centralized_boolean_attention_mask.py rejected, champion 2.0916
+[2026-08-31 03:37:47Z] --- iteration 2/20 --- route=STRUCTURAL profile=launch parent=v024_centralized_attention_mask_dispatch.py beam=3 flat=1 best=2.0916 elapsed=0.0h (13/13 shapes >4.0x off SOL)
+[2026-08-31 03:37:47Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 942x off SOL (memory-bound), case 3 430x off SOL (compute-bound), case 7 238x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 03:37:47Z]   asking the model for a candidate...
+[2026-08-31 03:38:38Z] wrote v029_hypothesis_fusing_the_final.py (208 lines)
+[2026-08-31 03:38:38Z]   hypothesis: import torch
+[2026-08-31 03:38:38Z] evaluating v029_hypothesis_fusing_the_final.py on profile=launch (timeout 40m)
+[2026-08-31 03:41:34Z] evaluation finished in 176s (rc=0)
+[2026-08-31 03:41:34Z] no improvement (champion still 2.0916), flat=2
+[2026-08-31 03:41:34Z] iteration 2 took 227s
