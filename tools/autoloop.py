@@ -41,6 +41,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 import ledger  # noqa: E402
 import routing  # noqa: E402
+import tuner  # noqa: E402
 
 API_BASE = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
 LOG = ROOT / "results" / "autoloop.log"
@@ -252,6 +253,46 @@ def write_status(reason: str, best_score: float, iterations: int,
     log(f"wrote {STATUS.relative_to(ROOT)}")
 
 
+def run_tuning(decision, args, iteration: int, flat: int):
+    """Sweep the champion's launch configurations. Returns a candidate filename
+    when the sweep found a gain worth measuring, else None (tuning exhausted).
+
+    A sweep that only matches the incumbent is not a result: the measured
+    identity-control noise is ~2%, so anything inside that margin is indis-
+    tinguishable from drift. Recording the sweep is what advances the loop --
+    once a candidate is swept, routing stops proposing TUNE for it.
+    """
+    parent = ROOT / "candidates" / decision.parent
+    log(f"  mechanical sweep of {decision.parent} (no model call)")
+    try:
+        rc = subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "tuner.py"), str(parent),
+             "--cases", args.tune_cases], cwd=ROOT,
+            timeout=args.eval_timeout).returncode
+    except subprocess.TimeoutExpired:
+        log("  sweep exceeded the evaluation timeout")
+        return None
+    record = ROOT / "results" / f"tuning_{parent.stem}_best.json"
+    if rc or not record.exists():
+        log("  sweep produced no usable result")
+        return None
+
+    best = json.loads(record.read_text())
+    gain = best.get("global_geomean", 0.0)
+    champ = ledger.champion(ledger.FULL_CASES, dtype=args.dtype)
+    ref = champ["score"] if champ else 0.0
+    if not best.get("global") or gain <= ref * routing.TUNE_NOISE_MARGIN:
+        log(f"  tuning exhausted: best {gain:.4f} vs champion {ref:.4f}, "
+            f"inside the {routing.TUNE_NOISE_MARGIN:.0%} noise margin")
+        return None
+
+    name = f"v{next_version():03d}_{parent.stem[:26]}_tuned.py"
+    (ROOT / "candidates" / name).write_text(
+        tuner.make_variant(parent.read_text(), best["global"]))
+    log(f"  wrote {name} with {best['global']} (sweep geomean {gain:.4f})")
+    return name
+
+
 def build_prompt(decision) -> str:
     entries = ledger.load()
     champ = ledger.champion(ledger.FULL_CASES, dtype="float32")
@@ -416,6 +457,8 @@ def main() -> int:
                         "Strongly recommended for unattended runs: otherwise a "
                         "stall at 01:00 bills until you notice. Requires "
                         "RUNPOD_API_KEY. Never terminates, so /workspace is safe")
+    p.add_argument("--tune-cases", default="1,2,12",
+                   help="shapes the mechanical sweep measures configs on")
     p.add_argument("--eval-timeout", type=int, default=2400,
                    help="seconds before an evaluation is abandoned (default 40m). "
                         "Without this a hung ssh transport stalls the run forever")
@@ -481,27 +524,41 @@ def main() -> int:
             f"elapsed={elapsed_h:.1f}h ({decision.reason})")
         if args.verbose and decision.guidance:
             log(f"  guidance: {decision.guidance[:300]}")
-        log("  asking the model for a candidate...")
-        try:
-            reply = call_model(build_prompt(decision), args.model)
-            code = extract_code(reply)
-        except Exception as e:
-            log(f"generation failed: {type(e).__name__}: {e}"); flat += 1; continue
 
-        problems = screen(code)
-        if problems:
-            log(f"REJECTED before execution: {'; '.join(problems)}")
-            flat += 1
-            continue
+        name = None
+        if decision.mode == "TUNE":
+            # Mechanical path: sweep the champion's launch parameters before
+            # paying a model to invent a new structure. No API call here.
+            name = run_tuning(decision, args, i, flat)
+            if name is None:
+                flat += 1
+                if args.push_results:
+                    push_results(f"iteration {i} — tuning exhausted for "
+                                 f"{decision.parent}")
+                continue
+        else:
+            log("  asking the model for a candidate...")
+            try:
+                reply = call_model(build_prompt(decision), args.model)
+                code = extract_code(reply)
+            except Exception as e:
+                log(f"generation failed: {type(e).__name__}: {e}")
+                flat += 1
+                continue
 
-        name = f"v{next_version():03d}_{slug(code)}.py"
-        path = ROOT / "candidates" / name
-        path.write_text(code)
-        headline = next((l.strip().strip('"') for l in code.splitlines()
-                         if l.strip().strip('"')), "")
-        log(f"wrote {name} ({len(code.splitlines())} lines)")
-        if args.verbose:
-            log(f"  hypothesis: {headline[:200]}")
+            problems = screen(code)
+            if problems:
+                log(f"REJECTED before execution: {'; '.join(problems)}")
+                flat += 1
+                continue
+
+            name = f"v{next_version():03d}_{slug(code)}.py"
+            (ROOT / "candidates" / name).write_text(code)
+            headline = next((l.strip().strip('"') for l in code.splitlines()
+                             if l.strip().strip('"')), "")
+            log(f"wrote {name} ({len(code.splitlines())} lines)")
+            if args.verbose:
+                log(f"  hypothesis: {headline[:200]}")
 
         if args.dry_run:
             log("dry-run: skipping evaluation"); continue

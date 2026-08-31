@@ -28,6 +28,7 @@ from typing import Any, Dict, List, Optional
 
 import ledger
 import roofline
+import tuner
 from race import PROFILES
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -38,6 +39,8 @@ SOL_DONE = 1.5
 SOL_STRUCTURAL = 4.0
 # Force a neutral screening profile every N cycles to bound selection bias.
 NEUTRAL_EVERY = 3
+# A tuning gain smaller than the measured identity-control noise is not a gain.
+TUNE_NOISE_MARGIN = 1.02
 
 
 @dataclass
@@ -137,6 +140,33 @@ def choose_profile(target_cases: List[str], cycle: int) -> str:
 # ROUTE -- tune, restructure, or stop
 # --------------------------------------------------------------------------
 
+def tuning_state(candidate: str) -> Dict[str, Any]:
+    """Has this candidate's configuration space been swept, and did it help?
+
+    This is the TUNE trigger rather than gap-to-SOL. Whether a candidate has
+    unswept launch parameters is a fact readable from its source; the roofline
+    gap is a modelled estimate, and the current model is optimistic enough that
+    the TUNE band is unreachable. Prefer the fact.
+    """
+    path = ROOT / "candidates" / candidate
+    if not path.exists():
+        return {"tunable": False, "reason": "candidate file missing"}
+    sites = tuner.find_sites(path.read_text())
+    if not sites["kernels"] or not sites["num_warps"]:
+        return {"tunable": False, "sites": sites,
+                "reason": "no triton kernel with a launch parameter to sweep"}
+    record = ROOT / "results" / f"tuning_{path.stem}_best.json"
+    if not record.exists():
+        return {"tunable": True, "swept": False, "sites": sites,
+                "reason": f"{sites['kernels']} kernel(s), {sites['num_warps']} "
+                          f"launch site(s), never swept"}
+    best = json.loads(record.read_text())
+    gain = best.get("global_geomean", 0.0)
+    return {"tunable": True, "swept": True, "sites": sites,
+            "global_geomean": gain,
+            "reason": f"already swept (best geomean {gain:.4f})"}
+
+
 def plateau_length(entries: Optional[List[Dict[str, Any]]] = None) -> int:
     """Consecutive full-sweep runs since the last promotion."""
     rows = entries if entries is not None else ledger.load()
@@ -166,7 +196,8 @@ def champion_report(champ: Optional[Dict[str, Any]]) -> Optional[Path]:
                 r = json.load(f)
         except (json.JSONDecodeError, OSError):
             continue
-        if r.get("candidate") != want:
+        # results/ also holds tuning manifests, which are JSON lists.
+        if not isinstance(r, dict) or r.get("candidate") != want:
             continue
         cases = ",".join(str(c["case"]) for c in r.get("cases", []))
         if cases != ledger.FULL_CASES:
@@ -190,6 +221,17 @@ def decide(cycle: int, dtype: str = "float32",
                         profile="general", beam_size=beam, elite_k=elite_k,
                         guidance="No champion exists. Propose a straightforward, "
                                  "correct optimization to establish a baseline.")
+
+    # Tuning is mechanical and costs no tokens, so exhaust it before paying a
+    # model to invent a new structure -- but only when there is something to
+    # tune. A pure-PyTorch champion has no launch parameters at all.
+    tune = tuning_state(champ["candidate"])
+    if tune.get("tunable") and not tune.get("swept"):
+        return Decision(
+            "TUNE", f"champion has unswept launch parameters: {tune['reason']}",
+            profile="launch", parent=champ["candidate"],
+            beam_size=beam, elite_k=elite_k,
+            guidance="Mechanical sweep of num_warps/num_stages; no model call.")
 
     report = champion_report(champ)
     if report is None:

@@ -91,6 +91,7 @@ STRUCTURAL --wins--> TUNE (retune the new structure)
 | Beam of 3 / elites of 2 over four candidates retains everything — selection pressure in name only | Widths scale with the eligible pool: beam 1 → 2 → 3 at 2 / 5 / 6+ candidates | `routing.adaptive_widths` |
 | Screening on a hypothesis-chosen profile selects for candidates suited to that profile | A neutral `general` profile is forced every third cycle, and screen-`promote`-then-full-fail is counted and surfaced | `routing.choose_profile`, `routing.screen_bias` |
 | Solves selection, not proposal — silent on tune vs restructure | P1 routes every cycle and injects the required move into the generation prompt | `routing.decide` → `autoloop.build_prompt` |
+| No mechanical tuning — every iteration paid a model even for parameter search | `TUNE` runs a config sweep with **no model call**; only when it is exhausted does the loop pay for a structural proposal | `routing.tuning_state` → `autoloop.run_tuning` → `tools/tuner.py` |
 
 ## Assessment
 
