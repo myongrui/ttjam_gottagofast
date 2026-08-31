@@ -323,3 +323,8 @@
 [2026-08-31 04:25:03Z] start model=gpt-5.6-sol effort=<model default> profile=auto incumbent=v024_centralized_attention_mask_dispatch.py score=2.0916
 [2026-08-31 04:25:03Z] --- iteration 1/1 --- route=STRUCTURAL profile=launch parent=v024_centralized_attention_mask_dispatch.py beam=3 flat=0 best=2.0916 elapsed=0.0h (13/13 shapes >4.0x off SOL; 3 runs without promotion)
 [2026-08-31 04:25:03Z]   asking the model for a candidate...
+[2026-08-31 04:45:50Z] pod start failed: HTTP 400 {"detail":"There are not enough free GPUs on the host machine to start this pod.","status":400,"title":"Bad Request"}
+
+[2026-08-31 04:46:32Z] pod start failed: HTTP 400 {"detail":"There are not enough free GPUs on the host machine to start this pod.","status":400,"title":"Bad Request"}
+
+[2026-08-31 04:47:52Z] pod ready after 1 probe(s)

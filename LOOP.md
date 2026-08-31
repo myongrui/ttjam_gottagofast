@@ -187,6 +187,24 @@ non-improvements, or an unreachable pod. It does **not** start the pod; a dead
 pod ends the run rather than recording candidates as failures.
 
 
+### Pod lifecycle caveat: `--stop-pod` can cost you the GPU
+
+A stopped Runpod pod stays bound to its original host, and its GPU is released
+to other users. Restarting only succeeds if that specific machine still has a
+free card. On a scarce GPU it does not:
+
+```
+HTTP 400: There are not enough free GPUs on the host machine to start this pod.
+```
+
+This happened twice on A100 80GB even while the pool showed HIGH availability —
+capacity existed, just not on the pinned host. So `--stop-pod` trades money for
+resumability. For a long session, prefer leaving the pod running; for an
+overnight unattended run, keep `--stop-pod` and accept that resuming may mean
+creating a fresh pod. Everything needed lives in git, so a rebuild is one
+`podsync` plus a repoint of `RUNPOD_POD_ID`/`POD_SSH` in `.env`.
+
+
 ## Running it
 
 ```bash
