@@ -206,3 +206,8 @@
 [2026-08-31 03:09:06Z] evaluation finished in 26s (rc=0)
 [2026-08-31 03:09:06Z] no improvement (champion still 2.0916), flat=3
 [2026-08-31 03:09:06Z] iteration 4 took 62s
+[2026-08-31 03:09:11Z] pushed: iteration 4 — v027_fused_residual_plus_layernorm.py rejected, champion 2.0916
+[2026-08-31 03:09:16Z] --- iteration 5/120 --- route=STRUCTURAL profile=launch parent=v024_centralized_attention_mask_dispatch.py beam=3 flat=3 best=2.0916 elapsed=0.1h (13/13 shapes >4.0x off SOL)
+[2026-08-31 03:09:16Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 942x off SOL (memory-bound), case 3 430x off SOL (compute-bound), case 7 238x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 03:09:16Z]   asking the model for a candidate...
+[2026-08-31 03:09:21Z] aborting on KeyboardInterrupt
