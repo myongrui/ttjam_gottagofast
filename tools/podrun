@@ -6,7 +6,7 @@
 # interactive bash over stdin: disable echo, reassemble a base64 payload in
 # <4096-byte chunks (PTY canonical-mode line limit), run it, print between markers.
 set -uo pipefail
-POD="${POD_SSH:-132yirw3l7rq7s-644121e6@ssh.runpod.io}"
+POD="${POD_SSH:-h9qpy3lmrt8be6-64411258@ssh.runpod.io}"
 KEY="${POD_KEY:-$HOME/.ssh/id_ed25519}"
 
 if [ "${1:-}" = "-f" ]; then PAYLOAD=$(cat "$2"); else PAYLOAD="${1:-}"; fi

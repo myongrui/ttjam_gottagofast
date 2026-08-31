@@ -3,7 +3,7 @@
 # The proxy tolerates few connections poorly and each session costs ~10s, so we
 # tar + base64 the whole set, ship it as chunked lines, and unpack remotely.
 set -uo pipefail
-POD="${POD_SSH:-132yirw3l7rq7s-644121e6@ssh.runpod.io}"
+POD="${POD_SSH:-h9qpy3lmrt8be6-64411258@ssh.runpod.io}"
 KEY="${POD_KEY:-$HOME/.ssh/id_ed25519}"
 REMOTE_DIR="$1"; shift
 TAR=$(mktemp /tmp/podsync.XXXXXX.tgz)
@@ -17,7 +17,7 @@ echo "sending $# file(s), $(wc -c < "$TAR") bytes tarred, $NCHUNK chunks"
   echo "mkdir -p '$REMOTE_DIR'; rm -f /tmp/_ps.b64 /tmp/_ps.tgz"
   echo "$B64" | fold -w 512 | while read -r c; do echo "printf '%s' '$c' >> /tmp/_ps.b64"; done
   echo "base64 -d /tmp/_ps.b64 > /tmp/_ps.tgz"
-  echo "echo __PODRUN_BEGIN; sha256sum /tmp/_ps.tgz | awk '{print \$1}'; tar xzf /tmp/_ps.tgz -C '$REMOTE_DIR' 2>/dev/null && echo UNPACK_OK || echo UNPACK_FAIL; echo __PODRUN_END"
+  echo "echo __PODRUN_BEGIN; sha256sum /tmp/_ps.tgz | awk '{print \$1}'; tar xzf /tmp/_ps.tgz -C '$REMOTE_DIR' 2>/dev/null; n=\$(tar tzf /tmp/_ps.tgz | grep -c '[^/]\$'); m=0; for f in \$(tar tzf /tmp/_ps.tgz | grep '[^/]\$'); do [ -f \"$REMOTE_DIR/\$f\" ] && m=\$((m+1)); done; [ \"\$m\" = \"\$n\" ] && echo UNPACK_OK || echo \"UNPACK_FAIL \$m/\$n\"; echo __PODRUN_END"
   echo 'exit'
 } | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -o LogLevel=ERROR -tt "$POD" 2>&1 \
   | tr -d '\r' | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' \

@@ -82,3 +82,4 @@
 [2026-08-31 02:02:13Z] waiting for pod ssh... probe 2/20
 [2026-08-31 02:04:23Z] waiting for pod ssh... probe 3/20
 [2026-08-31 02:06:33Z] waiting for pod ssh... probe 4/20
+[2026-08-31 02:22:08Z] pod ready after 1 probe(s)

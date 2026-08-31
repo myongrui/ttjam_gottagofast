@@ -51,7 +51,7 @@ def case_set(entry: Dict[str, Any]) -> str:
 
 
 def champion(cases: Optional[str] = None, entries: Optional[List[Dict[str, Any]]] = None,
-             dtype: Optional[str] = None) -> Optional[Dict[str, Any]]:
+             dtype: Optional[str] = None, gpu: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """Follow the statistically proven promotion lineage.
 
     Legacy point estimates seed the lineage. Once paired decisions are present,
@@ -65,6 +65,11 @@ def champion(cases: Optional[str] = None, entries: Optional[List[Dict[str, Any]]
         if cases is not None and case_set(e) != cases:
             continue
         if dtype is not None and e.get("dtype") != dtype:
+            continue
+        # A speedup measured on different silicon is a different quantity: the
+        # A100 40GB and 80GB differ by ~31% of memory bandwidth, which moves the
+        # compute/memory crossover and therefore the ratio itself.
+        if gpu is not None and e.get("gpu") != gpu:
             continue
         decision = e.get("decision")
         if decision is None or decision == "legacy":
