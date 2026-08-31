@@ -380,3 +380,13 @@
 [2026-08-31 05:20:32Z] evaluation finished in 17s (rc=0)
 [2026-08-31 05:20:32Z] no improvement (champion still 2.2969), flat=4
 [2026-08-31 05:20:32Z] iteration 5 took 125s
+[2026-08-31 05:20:35Z] pushed: iteration 5 — v042_torchscript_dispatched_native_encoder.py rejected, champion 2.2969
+[2026-08-31 05:20:39Z] --- iteration 6/20 --- route=STRUCTURAL profile=general parent=v038_torchscript_dispatched_transformer_candidate.py beam=3 flat=4 best=2.2969 elapsed=0.3h (13/13 shapes >4.0x off SOL)
+[2026-08-31 05:20:39Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 366x off SOL (memory-bound), case 3 190x off SOL (compute-bound), case 7 136x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 05:20:39Z]   asking the model for a candidate...
+[2026-08-31 05:23:43Z] wrote v043_shape_dispatched_native_encoder.py (308 lines)
+[2026-08-31 05:23:43Z]   hypothesis: Shape-dispatched native-encoder transformer.
+[2026-08-31 05:23:43Z] evaluating v043_shape_dispatched_native_encoder.py on profile=general (timeout 40m)
+[2026-08-31 05:25:55Z] evaluation finished in 132s (rc=0)
+[2026-08-31 05:25:55Z] no improvement (champion still 2.2969), flat=5
+[2026-08-31 05:25:55Z] iteration 6 took 316s
