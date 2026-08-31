@@ -1,3 +1,84 @@
 === iterate: v007_fuse_every_residual_add (cases=1,2,3,4,5,6,7,8,9,10,11,12,13 dtype=float32 incumbent=candidates/v014_residual_as_gemm_c.py) ===
 sending 22 file(s),    23149 bytes tarred, 61 chunks
 OK  synced to /workspace/techjam (sha256 verified, unpacked)
+case  1  ok               speedup=1.233  
+case  2  ok               speedup=1.390  
+case  3  ok               speedup=1.398  
+case  4  ok               speedup=1.361  
+case  5  ok               speedup=1.819  
+case  6  ok               speedup=2.017  
+case  7  ok               speedup=1.358  
+case  8  ok               speedup=1.129  
+case  9  ok               speedup=1.103  
+case 10  ok               speedup=1.196  
+case 11  ok               speedup=2.376  
+case 12  ok               speedup=1.366  
+case 13  ok               speedup=4.475  
+
+=== SUMMARY ===
+scored 13 cases | geomean 1.5698x | failed [] | env_unchanged True
+vs v014_residual_as_gemm_c.py: 0.9039x paired | 95% CI [0.8995, 0.9083] | reject
+SCORE 1.5698
+__PODRUN_RC=0
+got results/v007_fuse_every_residual_add.json (   42024 bytes)
+recorded
+16 attempt(s) recorded
+
+CHAMPION (full sweep): v014_residual_as_gemm_c.py  score=1.7858  (Residual-as-GEMM-C candidate.)
+
+candidate                            score   cases  decision           failed
+v000_identity.py                    0.9930       3  legacy             []
+v001_sdpa_fused_qkv.py              1.6982      13  legacy             []
+v002_compile_graphs.py              0.0000       0  legacy             [1, 2, 12]
+v003_compile_graphs.py              1.3753       3  legacy             []
+v005_eliminate_per_layer_host.py    1.4457       3  screen_reject      []
+v006_compile_only_the_ffn.py        1.1692       3  screen_reject      []
+v007_fuse_every_residual_add.py     2.0944       5  screen_promote     []
+v008_fuse_the_ffn_input.py          0.0000       0  invalid            [1, 2, 12]
+v009_native_transformerencoderlayer_fast_path.py  1.4052       3  screen_reject      []
+v010_hypothesis_the_attention_output.py  0.0000       0  invalid            [2, 6, 8, 11, 13]
+v011_candidate.py                   1.2377       3  screen_reject      []
+v012_hypothesis_fuse_each_layernorm.py  0.0000       0  invalid            [1, 2, 12]
+v013_hypothesis_fuse_each_residual.py  1.3163       3  screen_reject      []
+v014_residual_as_gemm_c.py          1.6086       3  screen_promote     []
+v014_residual_as_gemm_c.py          1.7858      13  promote            []
+v007_fuse_every_residual_add.py     1.5698      13  reject             []
+
+comparable on cases [1,2,3,4,5,6,7,8,9,10,11,12,13] (float32, NVIDIA A100-SXM4-40GB):
+  v014_residual_as_gemm_c.py        1.7858
+  v001_sdpa_fused_qkv.py            1.6982
+
+comparable on cases [2,6,8,11,13] (float32, NVIDIA A100-SXM4-40GB):
+  v007_fuse_every_residual_add.py   2.0944
+  v010_hypothesis_the_attention_output.py  0.0000
+
+comparable on cases [1,2,12] (float32, NVIDIA A100-SXM4-40GB):
+  v014_residual_as_gemm_c.py        1.6086
+  v005_eliminate_per_layer_host.py  1.4457
+  v009_native_transformerencoderlayer_fast_path.py  1.4052
+  v003_compile_graphs.py            1.3753
+  v013_hypothesis_fuse_each_residual.py  1.3163
+  v011_candidate.py                 1.2377
+  v006_compile_only_the_ffn.py      1.1692
+  v002_compile_graphs.py            0.0000
+  v008_fuse_the_ffn_input.py        0.0000
+  v012_hypothesis_fuse_each_layernorm.py  0.0000
+
+global beam (top 3, full float32 sweep):
+  v014_residual_as_gemm_c.py        1.7858
+  v001_sdpa_fused_qkv.py            1.6982
+
+per-shape elite archive (float32; top two parents):
+  case  1: v014_residual_as_gemm_c.py 1.5411x [proven], v005_eliminate_per_layer_host.py 1.4997x [proven]
+  case  2: v014_residual_as_gemm_c.py 1.6640x [provisional], v001_sdpa_fused_qkv.py 1.6140x [legacy]
+  case  3: v014_residual_as_gemm_c.py 1.6670x [provisional], v001_sdpa_fused_qkv.py 1.6108x [legacy]
+  case  4: v014_residual_as_gemm_c.py 1.6171x [provisional], v001_sdpa_fused_qkv.py 1.5965x [legacy]
+  case  5: v014_residual_as_gemm_c.py 1.9963x [proven], v007_fuse_every_residual_add.py 1.8191x [provisional]
+  case  6: v007_fuse_every_residual_add.py 2.0719x [proven], v014_residual_as_gemm_c.py 2.0504x [proven]
+  case  7: v014_residual_as_gemm_c.py 1.5702x [provisional], v001_sdpa_fused_qkv.py 1.5589x [legacy]
+  case  8: v007_fuse_every_residual_add.py 1.1332x [proven], v001_sdpa_fused_qkv.py 1.1095x [legacy]
+  case  9: v014_residual_as_gemm_c.py 1.2431x [proven], v001_sdpa_fused_qkv.py 1.1579x [legacy]
+  case 10: v014_residual_as_gemm_c.py 1.3922x [proven], v001_sdpa_fused_qkv.py 1.3537x [legacy]
+  case 11: v014_residual_as_gemm_c.py 2.9233x [proven], v007_fuse_every_residual_add.py 2.7353x [proven]
+  case 12: v001_sdpa_fused_qkv.py 1.6598x [legacy], v014_residual_as_gemm_c.py 1.6369x [provisional]
+  case 13: v007_fuse_every_residual_add.py 4.7715x [proven], v014_residual_as_gemm_c.py 4.6877x [proven]

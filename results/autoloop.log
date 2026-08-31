@@ -83,3 +83,13 @@
 [2026-08-31 02:04:23Z] waiting for pod ssh... probe 3/20
 [2026-08-31 02:06:33Z] waiting for pod ssh... probe 4/20
 [2026-08-31 02:22:08Z] pod ready after 1 probe(s)
+[2026-08-31 02:35:45Z] start model=gpt-5.6-terra profile=auto incumbent=v014_residual_as_gemm_c.py score=1.7858
+[2026-08-31 02:35:49Z] --- iteration 1/120 --- route=STRUCTURAL profile=launch parent=v014_residual_as_gemm_c.py beam=2 flat=0 best=1.7858 elapsed=0.0h (13/13 shapes >4.0x off SOL)
+[2026-08-31 02:35:49Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 1052x off SOL (memory-bound), case 3 475x off SOL (compute-bound), case 7 272x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate k
+[2026-08-31 02:35:49Z]   asking the model for a candidate...
+[2026-08-31 02:36:30Z] wrote v016_folded_attention_output_candidate.py (138 lines)
+[2026-08-31 02:36:30Z]   hypothesis: Folded-attention-output candidate.
+[2026-08-31 02:36:30Z] evaluating v016_folded_attention_output_candidate.py on profile=launch (timeout 40m)
+[2026-08-31 02:36:49Z] evaluation finished in 19s (rc=0)
+[2026-08-31 02:36:49Z] no improvement (champion still 1.7858), flat=1
+[2026-08-31 02:36:49Z] iteration 1 took 60s

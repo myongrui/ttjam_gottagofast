@@ -1,0 +1,185 @@
+{
+  "candidate": "v016_folded_attention_output_candidate.py",
+  "candidate_doc": "Folded-attention-output candidate.\n\nHypothesis: the attention output projection is a removable launch-bound GEMM on the\ntarget small-width cases.  Because attention is linear in V, this implementation\nfolds the baseline output-projection matrix and bias into the V projection during\nweight loading: attention(Q, K, V) @ W_out.T + b_out becomes\nattention(Q, K, V @ W_out.T + b_v @ W_out.T + b_out).  The attention result is\ntherefore already in model space, eliminating every attention output-projection\nGEMM while retaining only the necessary residual-add kernel.",
+  "incumbent": "v014_residual_as_gemm_c.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-31T02:36:43",
+  "cases": [
+    {
+      "case": 1,
+      "shape": {
+        "case": 1,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.5714035630226135,
+            "max_rel": 131958.078125
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.07963764667510986,
+            "max_rel": 12327.884765625
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 1.2835636138916016,
+            "max_rel": 288836.96875
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.5125226974487305,
+            "max_rel": 14050.7470703125
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.29992038011550903,
+            "max_rel": 9190.0791015625
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.41518864035606384,
+            "max_rel": 3269.723876953125
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.04954671859741211,
+            "max_rel": 143.883056640625
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.8865211009979248,
+            "max_rel": 3498.89892578125
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.27273130416870117,
+            "max_rel": 363.7284240722656
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.20347583293914795,
+            "max_rel": 172.26026916503906
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 12,
+      "shape": {
+        "case": 12,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 32,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.6791168451309204,
+            "max_rel": 13785.1083984375
+          },
+          {
+            "variant": "large_scale",
+            "passed": false,
+            "max_abs": 0.0850071907043457,
+            "max_rel": 1632.0966796875
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 1.450854778289795,
+            "max_rel": 48659.640625
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.6490414142608643,
+            "max_rel": 9147.103515625
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": false,
+            "max_abs": 0.2792665958404541,
+            "max_rel": 4141.5146484375
+          }
+        ]
+      },
+      "status": "incorrect"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_unchanged": true,
+  "failed_cases": [
+    1,
+    2,
+    12
+  ],
+  "n_scored": 0,
+  "geomean_speedup": 0.0,
+  "score": 0.0
+}
