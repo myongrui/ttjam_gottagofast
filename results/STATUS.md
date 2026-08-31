@@ -25,3 +25,12 @@
 ```
 autoloop stopped: 5 consecutive non-improvements -- the search has stalled and needs a structural idea. Best 1.9141 after 8 iterations. Read results/STATUS.md, results/ledger.jsonl and LOOP.md, diagnose the stall, and propose the next candidate.
 ```
+
+## Health check 2026-08-31 03:31Z
+
+- state: **PROGRESSING**
+- champion: v024_centralized_attention_mask_dispatch.py @ 2.0916 (30 attempts, plateau 0)
+- last activity: RESULTS.md, 0.0h ago
+- route: STRUCTURAL — 13/13 shapes >4.0x off SOL
+- screen contradiction rate: 25%
+- action: none needed

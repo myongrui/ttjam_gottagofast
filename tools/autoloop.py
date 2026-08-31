@@ -134,6 +134,14 @@ def push_results(reason: str) -> bool:
     running, which is precisely when someone wants to look. Rebases first,
     because a second session may have pushed in the meantime.
     """
+    # Refresh the human-readable summary so every commit carries a current
+    # answer to "what would we submit, and how fast is it?".
+    try:
+        subprocess.run([sys.executable, str(ROOT / "tools" / "report.py")],
+                       cwd=ROOT, capture_output=True, timeout=120)
+    except Exception as e:
+        log(f"report generation failed: {type(e).__name__}")
+
     try:
         subprocess.run(["git", "add", "results", "candidates"], cwd=ROOT,
                        check=True, capture_output=True)

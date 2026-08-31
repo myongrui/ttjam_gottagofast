@@ -130,7 +130,8 @@ def global_beam(entries: Optional[List[Dict[str, Any]]] = None,
 def per_shape_elites(entries: Optional[List[Dict[str, Any]]] = None,
                      dtype: str = DEFAULT_DTYPE,
                      top_k: int = 1,
-                     proven_only: bool = False) -> Dict[str, List[Dict[str, Any]]]:
+                     proven_only: bool = False,
+                     gpu: Optional[str] = None) -> Dict[str, List[Dict[str, Any]]]:
     """Best valid candidates for every shape, regardless of global score.
 
     Exact-shape dispatch makes a locally strong implementation useful even when
@@ -138,6 +139,12 @@ def per_shape_elites(entries: Optional[List[Dict[str, Any]]] = None,
     winner also preserves parent diversity and softens point-estimate noise.
     """
     rows = entries if entries is not None else load()
+    # A per-shape speedup measured on different silicon is not comparable: the
+    # 40GB and 80GB A100s differ by ~31% of memory bandwidth. Without this a
+    # stale 40GB elite outranks a current 80GB one and the dispatcher composes
+    # specialists that were never measured on the hardware in play.
+    if gpu is not None:
+        rows = [e for e in rows if e.get("gpu") == gpu]
     by_shape: Dict[str, List[Dict[str, Any]]] = {}
     for entry in rows:
         if entry.get("dtype") != dtype or not entry.get("env_unchanged", False):

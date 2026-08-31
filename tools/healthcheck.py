@@ -114,6 +114,13 @@ def main() -> int:
     elif a["state"] in ("IDLE", "NOT_RUNNING"):
         note = f"loop is {a['state'].lower()}; start the pod and run autoloop"
 
+    # Keep the reader-facing summary current even when no loop is running.
+    try:
+        subprocess.run([sys.executable, str(ROOT / "tools" / "report.py")],
+                       cwd=ROOT, capture_output=True, timeout=120)
+    except Exception:
+        pass
+
     STATUS.parent.mkdir(parents=True, exist_ok=True)
     if not STATUS.exists():
         STATUS.write_text("# TechJam loop status\n")

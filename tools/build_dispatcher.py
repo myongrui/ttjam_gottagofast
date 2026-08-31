@@ -24,9 +24,17 @@ def config_key(shape):
     )
 
 
+# A specialist must beat the generalist by more than the measured
+# identity-control noise, or it is not a specialist -- just a different way of
+# spelling the same number.
+SPECIALIST_MARGIN = 1.02
+
+
 def choose_mapping(dtype: str):
-    elites = ledger.per_shape_elites(dtype=dtype, top_k=1, proven_only=True)
     champion = ledger.champion(ledger.FULL_CASES, dtype=dtype)
+    gpu = champion.get("gpu") if champion else None
+    elites = ledger.per_shape_elites(dtype=dtype, top_k=1, proven_only=True,
+                                     gpu=gpu)
     if not champion:
         raise RuntimeError(f"no full-sweep {dtype} champion is available")
     fallback = champion["candidate"]
@@ -38,7 +46,14 @@ def choose_mapping(dtype: str):
     notes = []
     for shape in shapes.as_dicts():
         case = str(shape["case"])
-        selected = elites.get(case, [{}])[0].get("candidate", fallback)
+        elite = (elites.get(case) or [{}])[0]
+        selected = elite.get("candidate", fallback)
+        # Only displace the generalist when the margin is real.
+        generalist_speed = (champion.get("per_case", {}).get(case) or {}).get("speedup")
+        elite_speed = elite.get("speedup")
+        if selected != fallback and generalist_speed and elite_speed:
+            if elite_speed < generalist_speed * SPECIALIST_MARGIN:
+                selected = fallback
         if selected not in available:
             selected = fallback
         mapping[config_key(shape)] = selected
