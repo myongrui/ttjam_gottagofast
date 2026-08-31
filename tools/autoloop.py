@@ -160,10 +160,16 @@ def wait_for_pod(attempts: int = 30, delay: int = 10) -> bool:
     polling the real transport is the only trustworthy readiness signal.
     """
     for i in range(1, attempts + 1):
-        probe = subprocess.run([str(ROOT / "tools" / "podrun"), "echo ALIVE"],
-                               capture_output=True, text=True, cwd=ROOT,
-                               timeout=120)
-        if "ALIVE" in probe.stdout:
+        try:
+            probe = subprocess.run([str(ROOT / "tools" / "podrun"), "echo ALIVE"],
+                                   capture_output=True, text=True, cwd=ROOT,
+                                   timeout=120)
+            ready = "ALIVE" in probe.stdout
+        except subprocess.TimeoutExpired:
+            # A probe that hangs means the pod is not up yet, not that the
+            # caller should crash -- this guard exists to prevent hangs.
+            ready = False
+        if ready:
             log(f"pod ready after {i} probe(s)")
             return True
         # Silence for ten minutes is indistinguishable from a hang, so report.

@@ -77,3 +77,8 @@
 [2026-08-31 01:30:56Z] pod 132yirw3l7rq7s: stop requested
 [2026-08-31 01:31:04Z] pod 132yirw3l7rq7s: start requested
 [2026-08-31 01:52:04Z] aborting on KeyboardInterrupt
+[2026-08-31 01:55:48Z] pod 132yirw3l7rq7s: start requested
+[2026-08-31 02:00:03Z] waiting for pod ssh... probe 1/20
+[2026-08-31 02:02:13Z] waiting for pod ssh... probe 2/20
+[2026-08-31 02:04:23Z] waiting for pod ssh... probe 3/20
+[2026-08-31 02:06:33Z] waiting for pod ssh... probe 4/20
