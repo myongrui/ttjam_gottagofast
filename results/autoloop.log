@@ -93,3 +93,13 @@
 [2026-08-31 02:36:49Z] evaluation finished in 19s (rc=0)
 [2026-08-31 02:36:49Z] no improvement (champion still 1.7858), flat=1
 [2026-08-31 02:36:49Z] iteration 1 took 60s
+[2026-08-31 02:36:52Z] pushed: iteration 1 — v016_folded_attention_output_candidate.py rejected, champion 1.7858
+[2026-08-31 02:36:56Z] --- iteration 2/120 --- route=STRUCTURAL profile=launch parent=v014_residual_as_gemm_c.py beam=2 flat=1 best=1.7858 elapsed=0.0h (13/13 shapes >4.0x off SOL)
+[2026-08-31 02:36:56Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 1052x off SOL (memory-bound), case 3 475x off SOL (compute-bound), case 7 272x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate k
+[2026-08-31 02:36:56Z]   asking the model for a candidate...
+[2026-08-31 02:37:32Z] wrote v017_boolean_mask_attention_candidate.py (120 lines)
+[2026-08-31 02:37:32Z]   hypothesis: Boolean-mask attention candidate.
+[2026-08-31 02:37:32Z] evaluating v017_boolean_mask_attention_candidate.py on profile=launch (timeout 40m)
+[2026-08-31 02:37:54Z] evaluation finished in 22s (rc=0)
+[2026-08-31 02:37:54Z] no improvement (champion still 1.7858), flat=2
+[2026-08-31 02:37:54Z] iteration 2 took 58s
