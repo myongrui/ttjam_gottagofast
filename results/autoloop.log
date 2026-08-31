@@ -360,3 +360,13 @@
 [2026-08-31 05:14:14Z] evaluation finished in 270s (rc=0)
 [2026-08-31 05:14:14Z] no improvement (champion still 2.2969), flat=2
 [2026-08-31 05:14:14Z] iteration 3 took 346s
+[2026-08-31 05:14:18Z] pushed: iteration 3 — v040_frozen_torchscript_transformer_candidate.py rejected, champion 2.2969
+[2026-08-31 05:14:21Z] --- iteration 4/20 --- route=STRUCTURAL profile=launch parent=v038_torchscript_dispatched_transformer_candidate.py beam=3 flat=2 best=2.2969 elapsed=0.2h (13/13 shapes >4.0x off SOL)
+[2026-08-31 05:14:21Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 366x off SOL (memory-bound), case 3 190x off SOL (compute-bound), case 7 136x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 05:14:21Z]   asking the model for a candidate...
+[2026-08-31 05:15:42Z] wrote v041_single_token_attention_specialization.py (216 lines)
+[2026-08-31 05:15:42Z]   hypothesis: Single-token attention specialization.
+[2026-08-31 05:15:42Z] evaluating v041_single_token_attention_specialization.py on profile=launch (timeout 40m)
+[2026-08-31 05:18:21Z] evaluation finished in 159s (rc=0)
+[2026-08-31 05:18:21Z] no improvement (champion still 2.2969), flat=3
+[2026-08-31 05:18:21Z] iteration 4 took 240s
