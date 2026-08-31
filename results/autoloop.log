@@ -272,3 +272,17 @@
 [2026-08-31 03:50:17Z] pushed: iteration 5 — v032_final_layernorm_plus_padding.py rejected, champion 2.0916
 [2026-08-31 03:50:17Z] stop: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
 [2026-08-31 03:50:17Z] wrote results/STATUS.md
+[2026-08-31 03:50:21Z] pushed: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
+[2026-08-31 03:50:23Z] pod h9qpy3lmrt8be6: stop requested
+[2026-08-31 04:14:27Z] pod h9qpy3lmrt8be6: start requested
+[2026-08-31 04:14:31Z] pod ready after 1 probe(s)
+[2026-08-31 04:14:31Z] start model=gpt-5.6-terra profile=auto incumbent=v024_centralized_attention_mask_dispatch.py score=2.0916
+[2026-08-31 04:14:35Z] --- iteration 1/20 --- route=STRUCTURAL profile=launch parent=v024_centralized_attention_mask_dispatch.py beam=3 flat=0 best=2.0916 elapsed=0.0h (13/13 shapes >4.0x off SOL)
+[2026-08-31 04:14:35Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 942x off SOL (memory-bound), case 3 430x off SOL (compute-bound), case 7 238x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 04:14:35Z]   asking the model for a candidate...
+[2026-08-31 04:15:11Z] wrote v033_hypothesis_route_non_causal.py (148 lines)
+[2026-08-31 04:15:11Z]   hypothesis: import torch
+[2026-08-31 04:15:11Z] evaluating v033_hypothesis_route_non_causal.py on profile=launch (timeout 40m)
+[2026-08-31 04:15:32Z] evaluation finished in 21s (rc=0)
+[2026-08-31 04:15:32Z] no improvement (champion still 2.0916), flat=1
+[2026-08-31 04:15:32Z] iteration 1 took 57s
