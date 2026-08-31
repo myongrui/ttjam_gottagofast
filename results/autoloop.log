@@ -239,3 +239,13 @@
 [2026-08-31 03:41:34Z] evaluation finished in 176s (rc=0)
 [2026-08-31 03:41:34Z] no improvement (champion still 2.0916), flat=2
 [2026-08-31 03:41:34Z] iteration 2 took 227s
+[2026-08-31 03:41:38Z] pushed: iteration 2 — v029_hypothesis_fusing_the_final.py rejected, champion 2.0916
+[2026-08-31 03:41:43Z] --- iteration 3/20 --- route=STRUCTURAL profile=general parent=v024_centralized_attention_mask_dispatch.py beam=3 flat=2 best=2.0916 elapsed=0.1h (13/13 shapes >4.0x off SOL)
+[2026-08-31 03:41:43Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 942x off SOL (memory-bound), case 3 430x off SOL (compute-bound), case 7 238x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 03:41:43Z]   asking the model for a candidate...
+[2026-08-31 03:42:32Z] wrote v030_native_multi_head_attention.py (157 lines)
+[2026-08-31 03:42:32Z]   hypothesis: Native multi-head-attention fast-path candidate.
+[2026-08-31 03:42:32Z] evaluating v030_native_multi_head_attention.py on profile=general (timeout 40m)
+[2026-08-31 03:47:23Z] evaluation finished in 291s (rc=0)
+[2026-08-31 03:47:23Z] no improvement (champion still 2.0916), flat=3
+[2026-08-31 03:47:23Z] iteration 3 took 340s
