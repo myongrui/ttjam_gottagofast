@@ -69,3 +69,7 @@
 [2026-08-30 23:15:57Z] --- iteration 2/120 --- route=STRUCTURAL profile=launch parent=v001_sdpa_fused_qkv.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 23:16:39Z] wrote v014_residual_as_gemm_c.py
 [2026-08-30 23:19:41Z] IMPROVED 1.6982 -> 1.7858 (v014_residual_as_gemm_c.py)
+[2026-08-30 23:19:44Z] pushed: iteration 2 — v014_residual_as_gemm_c.py promoted, 1.7858
+[2026-08-30 23:19:48Z] --- iteration 3/120 --- route=STRUCTURAL profile=general parent=v014_residual_as_gemm_c.py beam=2 (13/13 shapes >4.0x off SOL)
+[2026-08-30 23:20:07Z] wrote v015_deferred_padding_mask_candidate.py
+[2026-08-31 01:30:48Z] aborting on KeyboardInterrupt
