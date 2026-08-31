@@ -56,3 +56,14 @@ build-time introspection. The non-causal branch (unused by the official
 suite) now builds its cheap [B,1,1,S] mask unconditionally too, so neither
 branch ever reads mask contents on the host. Not yet raced -- no pod access
 from this session.
+
+## 2026-08-31 (later) — nightly health check (cloud, no pod access)
+
+No change since the prior check ~2h ago: HEAD is still aa63fcd, ledger has
+no entries past v048 (12:57 UTC), champion remains v038 at 2.2969. v049 has
+not been raced yet -- the loop/autoloop appears not to be running right now
+(no pod access from this session to start it or race candidates). Not
+proposing a second candidate on top of v049: no new evidence has arrived
+since it was written, and the stall diagnosis it targets (the per-forward
+host-device sync in v038's mask path) is unchanged. Next step is for the
+loop to race v049 against v038 on the `launch`/`general` profiles.
