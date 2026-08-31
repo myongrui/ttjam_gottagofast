@@ -186,3 +186,13 @@
 [2026-08-31 03:06:27Z] evaluation finished in 25s (rc=0)
 [2026-08-31 03:06:27Z] no improvement (champion still 2.0916), flat=1
 [2026-08-31 03:06:27Z] iteration 2 took 61s
+[2026-08-31 03:06:30Z] pushed: iteration 2 — v025_hypothesis_replace_the_synchronized.py rejected, champion 2.0916
+[2026-08-31 03:06:35Z] --- iteration 3/120 --- route=STRUCTURAL profile=general parent=v024_centralized_attention_mask_dispatch.py beam=3 flat=1 best=2.0916 elapsed=0.1h (13/13 shapes >4.0x off SOL)
+[2026-08-31 03:06:35Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 942x off SOL (memory-bound), case 3 430x off SOL (compute-bound), case 7 238x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 03:06:35Z]   asking the model for a candidate...
+[2026-08-31 03:07:21Z] wrote v026_fused_pre_attention_layernorm.py (224 lines)
+[2026-08-31 03:07:21Z]   hypothesis: Fused pre-attention LayerNorm and QKV projection candidate.
+[2026-08-31 03:07:21Z] evaluating v026_fused_pre_attention_layernorm.py on profile=general (timeout 40m)
+[2026-08-31 03:07:56Z] evaluation finished in 35s (rc=0)
+[2026-08-31 03:07:56Z] no improvement (champion still 2.0916), flat=2
+[2026-08-31 03:07:56Z] iteration 3 took 82s

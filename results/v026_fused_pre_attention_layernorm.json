@@ -1,0 +1,234 @@
+{
+  "candidate": "v026_fused_pre_attention_layernorm.py",
+  "candidate_doc": "Fused pre-attention LayerNorm and QKV projection candidate.\n\nHypothesis: every transformer block currently launches a LayerNorm kernel before\nthe fused QKV GEMM.  For the dominant d_model=128 shapes, a Triton kernel can\nnormalize each token and immediately multiply it by the concatenated QKV weight\nmatrix, eliminating one launch and the normalized activation materialization per\nattention layer.  The remaining attention, residual, FFN, masking, and output\nsemantics are unchanged.",
+  "incumbent": "v024_centralized_attention_mask_dispatch.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-31T03:07:37",
+  "cases": [
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "status": "runtime_error",
+      "error": "CompilationError: at 17:13:\n    norm_bias_ptr,\n    out_ptr,\n    n_rows: tl.constexpr,\n    eps: tl.constexpr,\n    D: tl.constexpr,\n    N: tl.constexpr,\n    BLOCK_D: tl.constexpr,\n    BLOCK_N: tl.constexpr,\n):\n    row = tl.program_id(0)\n    offs_d = tl.arange(0, BLOCK_D)\n    offs_n = tl.arange(0, BLOCK_N)\n             ^",
+      "traceback": "File \"/workspace/techjam/candidates/v026_fused_pre_attention_layernorm.py\", line 66, in forward\n    _norm_qkv_128_kernel[(rows,)](\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 390, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 594, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 339, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 83, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 17:13:\n    norm_bias_ptr,\n    out_ptr,\n    n_rows: tl.constexpr,\n    eps: tl.constexpr,\n    D: tl.constexpr,\n    N: tl.constexpr,\n    BLOCK_D: tl.constexpr,\n    BLOCK_N: tl.constexpr,\n):\n    row = tl.program_id(0)\n    offs_d = tl.arange(0, BLOCK_D)\n    offs_n = tl.arange(0, BLOCK_N)\n             ^\n"
+    },
+    {
+      "case": 6,
+      "shape": {
+        "case": 6,
+        "batch_size": 10000,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 2.441,
+      "status": "runtime_error",
+      "error": "CompilationError: at 17:13:\n    norm_bias_ptr,\n    out_ptr,\n    n_rows: tl.constexpr,\n    eps: tl.constexpr,\n    D: tl.constexpr,\n    N: tl.constexpr,\n    BLOCK_D: tl.constexpr,\n    BLOCK_N: tl.constexpr,\n):\n    row = tl.program_id(0)\n    offs_d = tl.arange(0, BLOCK_D)\n    offs_n = tl.arange(0, BLOCK_N)\n             ^",
+      "traceback": "File \"/workspace/techjam/candidates/v026_fused_pre_attention_layernorm.py\", line 66, in forward\n    _norm_qkv_128_kernel[(rows,)](\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 390, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 594, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 339, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 83, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 17:13:\n    norm_bias_ptr,\n    out_ptr,\n    n_rows: tl.constexpr,\n    eps: tl.constexpr,\n    D: tl.constexpr,\n    N: tl.constexpr,\n    BLOCK_D: tl.constexpr,\n    BLOCK_N: tl.constexpr,\n):\n    row = tl.program_id(0)\n    offs_d = tl.arange(0, BLOCK_D)\n    offs_n = tl.arange(0, BLOCK_N)\n             ^\n"
+    },
+    {
+      "case": 8,
+      "shape": {
+        "case": 8,
+        "batch_size": 64,
+        "d_model": 1024,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 1024
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 2.384185791015625e-06,
+            "max_rel": 140.0
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 2.384185791015625e-06,
+            "max_rel": 0.0527777224779129
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 6.556510925292969e-06,
+            "max_rel": 8.456792831420898
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 2.384185791015625e-06,
+            "max_rel": 0.5879629254341125
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 1.9073486328125e-06,
+            "max_rel": 0.9074074029922485
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 25.02950382232666,
+        "mean_ms": 25.03747304280599,
+        "min_ms": 25.013376235961914,
+        "wall_ms": 25.035646557807922,
+        "n": 90,
+        "round_medians_ms": [
+          25.030927658081055,
+          25.025728225708008,
+          25.030223846435547
+        ]
+      },
+      "peak_mem_gib": 0.602,
+      "baseline": {
+        "median_ms": 28.13737678527832,
+        "mean_ms": 28.08204044765896,
+        "min_ms": 27.863359451293945,
+        "wall_ms": 28.157623608907063,
+        "n": 90,
+        "round_medians_ms": [
+          28.136303901672363,
+          28.13838481903076,
+          28.138480186462402
+        ]
+      },
+      "speedup": 1.1241683808441858,
+      "speedup_wall": 1.1247012751953667,
+      "paired_speedup": 1.1242066458759463,
+      "paired_speedup_ci95": [
+        1.1240615723879799,
+        1.1243782624525283
+      ],
+      "round_speedups": [
+        1.1240615723879799,
+        1.1243782624525283,
+        1.1241801255592643
+      ],
+      "wall_to_event_ratio": 1.0,
+      "stream_ok": true,
+      "status": "ok",
+      "incumbent": {
+        "median_ms": 25.03009605407715,
+        "mean_ms": 25.109080611334907,
+        "min_ms": 25.009855270385742,
+        "wall_ms": 25.04030590256055,
+        "n": 90,
+        "round_medians_ms": [
+          25.02999973297119,
+          25.021663665771484,
+          25.033087730407715
+        ]
+      },
+      "vs_incumbent": {
+        "speedup": 1.0000236613460136,
+        "speedup_wall": 1.0001861084251158,
+        "paired_speedup": 0.999971637140982,
+        "paired_speedup_ci95": [
+          0.9998375847487887,
+          1.0001144170339722
+        ],
+        "round_speedups": [
+          0.9999629288565515,
+          0.9998375847487887,
+          1.0001144170339722
+        ]
+      }
+    },
+    {
+      "case": 11,
+      "shape": {
+        "case": 11,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 16,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.062,
+      "status": "runtime_error",
+      "error": "CompilationError: at 17:13:\n    norm_bias_ptr,\n    out_ptr,\n    n_rows: tl.constexpr,\n    eps: tl.constexpr,\n    D: tl.constexpr,\n    N: tl.constexpr,\n    BLOCK_D: tl.constexpr,\n    BLOCK_N: tl.constexpr,\n):\n    row = tl.program_id(0)\n    offs_d = tl.arange(0, BLOCK_D)\n    offs_n = tl.arange(0, BLOCK_N)\n             ^",
+      "traceback": "File \"/workspace/techjam/candidates/v026_fused_pre_attention_layernorm.py\", line 66, in forward\n    _norm_qkv_128_kernel[(rows,)](\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 390, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 594, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 339, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 83, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 17:13:\n    norm_bias_ptr,\n    out_ptr,\n    n_rows: tl.constexpr,\n    eps: tl.constexpr,\n    D: tl.constexpr,\n    N: tl.constexpr,\n    BLOCK_D: tl.constexpr,\n    BLOCK_N: tl.constexpr,\n):\n    row = tl.program_id(0)\n    offs_d = tl.arange(0, BLOCK_D)\n    offs_n = tl.arange(0, BLOCK_N)\n             ^\n"
+    },
+    {
+      "case": 13,
+      "shape": {
+        "case": 13,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 1024,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 1.0,
+      "status": "runtime_error",
+      "error": "CompilationError: at 17:13:\n    norm_bias_ptr,\n    out_ptr,\n    n_rows: tl.constexpr,\n    eps: tl.constexpr,\n    D: tl.constexpr,\n    N: tl.constexpr,\n    BLOCK_D: tl.constexpr,\n    BLOCK_N: tl.constexpr,\n):\n    row = tl.program_id(0)\n    offs_d = tl.arange(0, BLOCK_D)\n    offs_n = tl.arange(0, BLOCK_N)\n             ^",
+      "traceback": "File \"/workspace/techjam/candidates/v026_fused_pre_attention_layernorm.py\", line 66, in forward\n    _norm_qkv_128_kernel[(rows,)](\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 390, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/runtime/jit.py\", line 594, in run\n    kernel = self.compile(src, target=target, options=options.__dict__)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 339, in compile\n    module = src.make_ir(options, codegen_fns, module_map, context)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/triton/compiler/compiler.py\", line 83, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntriton.compiler.errors.CompilationError: at 17:13:\n    norm_bias_ptr,\n    out_ptr,\n    n_rows: tl.constexpr,\n    eps: tl.constexpr,\n    D: tl.constexpr,\n    N: tl.constexpr,\n    BLOCK_D: tl.constexpr,\n    BLOCK_N: tl.constexpr,\n):\n    row = tl.program_id(0)\n    offs_d = tl.arange(0, BLOCK_D)\n    offs_n = tl.arange(0, BLOCK_N)\n             ^\n"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_unchanged": true,
+  "failed_cases": [
+    2,
+    6,
+    11,
+    13
+  ],
+  "n_scored": 1,
+  "geomean_speedup": 1.1241683808441858,
+  "score": 0.0,
+  "incumbent_comparison": {
+    "incumbent": "v024_centralized_attention_mask_dispatch.py",
+    "n_cases": 1,
+    "round_geomeans": [
+      0.9999629288565515,
+      0.9998375847487887,
+      1.0001144170339722
+    ],
+    "paired_geomean": 0.999971637140982,
+    "paired_geomean_ci95": [
+      0.9998375847487887,
+      1.0001144170339722
+    ],
+    "promotion_margin": 0.02,
+    "decision": "invalid"
+  }
+}
