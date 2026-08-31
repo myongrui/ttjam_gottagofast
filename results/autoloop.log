@@ -73,3 +73,6 @@
 [2026-08-30 23:19:48Z] --- iteration 3/120 --- route=STRUCTURAL profile=general parent=v014_residual_as_gemm_c.py beam=2 (13/13 shapes >4.0x off SOL)
 [2026-08-30 23:20:07Z] wrote v015_deferred_padding_mask_candidate.py
 [2026-08-31 01:30:48Z] aborting on KeyboardInterrupt
+[2026-08-31 01:30:50Z] pushed: aborted on KeyboardInterrupt
+[2026-08-31 01:30:56Z] pod 132yirw3l7rq7s: stop requested
+[2026-08-31 01:31:04Z] pod 132yirw3l7rq7s: start requested

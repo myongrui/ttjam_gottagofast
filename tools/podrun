@@ -21,6 +21,6 @@ B64=$(printf '%s' "$PAYLOAD" | base64 | tr -d '\n')
   echo 'bash /tmp/_pr.sh > /tmp/_pr.out 2>&1; echo "__PODRUN_RC=$?" >> /tmp/_pr.out'
   echo 'echo __PODRUN_BEGIN; cat /tmp/_pr.out; echo __PODRUN_END'
   echo 'exit'
-} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o LogLevel=ERROR -tt "$POD" 2>&1 \
+} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -o LogLevel=ERROR -tt "$POD" 2>&1 \
   | tr -d '\r' | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' \
   | awk '$0=="__PODRUN_BEGIN"{f=1;next} $0=="__PODRUN_END"{f=0} f'

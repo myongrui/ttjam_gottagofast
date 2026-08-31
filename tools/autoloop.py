@@ -161,10 +161,13 @@ def wait_for_pod(attempts: int = 30, delay: int = 10) -> bool:
     """
     for i in range(1, attempts + 1):
         probe = subprocess.run([str(ROOT / "tools" / "podrun"), "echo ALIVE"],
-                               capture_output=True, text=True, cwd=ROOT)
+                               capture_output=True, text=True, cwd=ROOT,
+                               timeout=120)
         if "ALIVE" in probe.stdout:
             log(f"pod ready after {i} probe(s)")
             return True
+        # Silence for ten minutes is indistinguishable from a hang, so report.
+        log(f"waiting for pod ssh... probe {i}/{attempts}")
         time.sleep(delay)
     return False
 
@@ -401,6 +404,11 @@ def main() -> int:
                         "Strongly recommended for unattended runs: otherwise a "
                         "stall at 01:00 bills until you notice. Requires "
                         "RUNPOD_API_KEY. Never terminates, so /workspace is safe")
+    p.add_argument("--eval-timeout", type=int, default=2400,
+                   help="seconds before an evaluation is abandoned (default 40m). "
+                        "Without this a hung ssh transport stalls the run forever")
+    p.add_argument("-v", "--verbose", action="store_true",
+                   help="log routing guidance and each candidate's hypothesis")
     p.add_argument("--dry-run", action="store_true",
                    help="generate and screen, but do not spend pod time")
     args = p.parse_args()
@@ -453,9 +461,15 @@ def main() -> int:
         if decision.mode == "STOP":
             stop_reason = decision.reason; break
         profile = args.profile if args.profile != "auto" else decision.profile
+        t_iter = time.time()
+        elapsed_h = (time.time() - (deadline - args.max_hours * 3600)) / 3600
         log(f"--- iteration {i}/{args.max_iters} --- route={decision.mode} "
             f"profile={profile} parent={decision.parent} "
-            f"beam={decision.beam_size} ({decision.reason})")
+            f"beam={decision.beam_size} flat={flat} best={best_score:.4f} "
+            f"elapsed={elapsed_h:.1f}h ({decision.reason})")
+        if args.verbose and decision.guidance:
+            log(f"  guidance: {decision.guidance[:300]}")
+        log("  asking the model for a candidate...")
         try:
             reply = call_model(build_prompt(decision), args.model)
             code = extract_code(reply)
@@ -471,14 +485,30 @@ def main() -> int:
         name = f"v{next_version():03d}_{slug(code)}.py"
         path = ROOT / "candidates" / name
         path.write_text(code)
-        log(f"wrote {name}")
+        headline = next((l.strip().strip('"') for l in code.splitlines()
+                         if l.strip().strip('"')), "")
+        log(f"wrote {name} ({len(code.splitlines())} lines)")
+        if args.verbose:
+            log(f"  hypothesis: {headline[:200]}")
 
         if args.dry_run:
             log("dry-run: skipping evaluation"); continue
 
-        rc = subprocess.run(
-            [sys.executable, str(ROOT / "tools" / "race.py"), f"candidates/{name}",
-             "--profile", profile, "--dtype", args.dtype], cwd=ROOT).returncode
+        log(f"evaluating {name} on profile={profile} (timeout {args.eval_timeout//60}m)")
+        t_eval = time.time()
+        try:
+            rc = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "race.py"), f"candidates/{name}",
+                 "--profile", profile, "--dtype", args.dtype], cwd=ROOT,
+                timeout=args.eval_timeout).returncode
+        except subprocess.TimeoutExpired:
+            # A hung evaluation used to stall the whole run indefinitely; the
+            # ssh transport can block forever if the pod dies mid-command.
+            log(f"evaluation of {name} exceeded {args.eval_timeout}s — abandoning "
+                f"this candidate and continuing")
+            flat += 1
+            continue
+        log(f"evaluation finished in {time.time() - t_eval:.0f}s (rc={rc})")
         if rc:
             log(f"race.py exited {rc}"); flat += 1; continue
 
@@ -492,6 +522,7 @@ def main() -> int:
             flat += 1
             log(f"no improvement (champion still {score:.4f}), flat={flat}")
             outcome = f"{name} rejected, champion {score:.4f}"
+        log(f"iteration {i} took {time.time() - t_iter:.0f}s")
         if args.push_results:
             push_results(f"iteration {i} — {outcome}")
 

@@ -8,7 +8,7 @@ REMOTE="$1"; LOCAL="$2"
   echo 'stty -echo 2>/dev/null'
   echo "echo __PODRUN_BEGIN; base64 -w0 '$REMOTE' 2>/dev/null || base64 '$REMOTE' | tr -d '\n'; echo; echo __PODRUN_END"
   echo 'exit'
-} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o LogLevel=ERROR -tt "$POD" 2>&1 \
+} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -o LogLevel=ERROR -tt "$POD" 2>&1 \
   | tr -d '\r' | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' \
   | awk '$0=="__PODRUN_BEGIN"{f=1;next} $0=="__PODRUN_END"{f=0} f' | tr -d '\n' | base64 -d > "$LOCAL"
 echo "got $LOCAL ($(wc -c < "$LOCAL") bytes)"

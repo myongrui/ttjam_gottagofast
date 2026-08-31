@@ -13,7 +13,7 @@ SUM=$(shasum -a 256 "$LOCAL" | awk '{print $1}')
   echo "base64 -d /tmp/_pp.b64 > '$REMOTE'"
   echo "echo __PODRUN_BEGIN; sha256sum '$REMOTE' | awk '{print \$1}'; wc -c < '$REMOTE'; echo __PODRUN_END"
   echo 'exit'
-} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o LogLevel=ERROR -tt "$POD" 2>&1 \
+} | ssh -i "$KEY" -o ConnectTimeout=20 -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -o LogLevel=ERROR -tt "$POD" 2>&1 \
   | tr -d '\r' | sed 's/\x1b\[[0-9;?]*[a-zA-Z]//g' \
   | awk '$0=="__PODRUN_BEGIN"{f=1;next} $0=="__PODRUN_END"{f=0} f' > /tmp/_pp_res.$$
 REMOTE_SUM=$(sed -n 1p /tmp/_pp_res.$$); REMOTE_LEN=$(sed -n 2p /tmp/_pp_res.$$); rm -f /tmp/_pp_res.$$
