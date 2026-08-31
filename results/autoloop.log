@@ -176,3 +176,13 @@
 [2026-08-31 03:05:18Z] evaluation finished in 171s (rc=0)
 [2026-08-31 03:05:18Z] IMPROVED 1.9141 -> 2.0916 (v024_centralized_attention_mask_dispatch.py)
 [2026-08-31 03:05:18Z] iteration 1 took 213s
+[2026-08-31 03:05:21Z] pushed: iteration 1 — v024_centralized_attention_mask_dispatch.py promoted, 2.0916
+[2026-08-31 03:05:25Z] --- iteration 2/120 --- route=STRUCTURAL profile=launch parent=v024_centralized_attention_mask_dispatch.py beam=3 flat=0 best=2.0916 elapsed=0.1h (13/13 shapes >4.0x off SOL)
+[2026-08-31 03:05:25Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 942x off SOL (memory-bound), case 3 430x off SOL (compute-bound), case 7 238x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 03:05:25Z]   asking the model for a candidate...
+[2026-08-31 03:06:02Z] wrote v025_hypothesis_replace_the_synchronized.py (120 lines)
+[2026-08-31 03:06:02Z]   hypothesis: Hypothesis: replace the synchronized "is every token valid?" decision with a
+[2026-08-31 03:06:02Z] evaluating v025_hypothesis_replace_the_synchronized.py on profile=launch (timeout 40m)
+[2026-08-31 03:06:27Z] evaluation finished in 25s (rc=0)
+[2026-08-31 03:06:27Z] no improvement (champion still 2.0916), flat=1
+[2026-08-31 03:06:27Z] iteration 2 took 61s
