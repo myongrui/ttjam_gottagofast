@@ -418,3 +418,6 @@
 [2026-08-31 12:32:38Z] wrote v045_composed_single_token_attention.py (269 lines)
 [2026-08-31 12:32:38Z]   hypothesis: Composed single-token attention transformer.
 [2026-08-31 12:32:38Z] evaluating v045_composed_single_token_attention.py on profile=launch (timeout 40m)
+[2026-08-31 12:35:41Z] evaluation finished in 182s (rc=0)
+[2026-08-31 12:35:41Z] no improvement (champion still 2.2969), flat=2
+[2026-08-31 12:35:41Z] iteration 2 took 346s
