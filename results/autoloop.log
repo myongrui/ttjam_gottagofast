@@ -103,3 +103,13 @@
 [2026-08-31 02:37:54Z] evaluation finished in 22s (rc=0)
 [2026-08-31 02:37:54Z] no improvement (champion still 1.7858), flat=2
 [2026-08-31 02:37:54Z] iteration 2 took 58s
+[2026-08-31 02:37:56Z] pushed: iteration 2 — v017_boolean_mask_attention_candidate.py rejected, champion 1.7858
+[2026-08-31 02:38:00Z] --- iteration 3/120 --- route=STRUCTURAL profile=general parent=v014_residual_as_gemm_c.py beam=2 flat=2 best=1.7858 elapsed=0.0h (13/13 shapes >4.0x off SOL)
+[2026-08-31 02:38:00Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 1052x off SOL (memory-bound), case 3 475x off SOL (compute-bound), case 7 272x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate k
+[2026-08-31 02:38:00Z]   asking the model for a candidate...
+[2026-08-31 02:38:18Z] wrote v018_deferred_padding_mask_candidate.py (115 lines)
+[2026-08-31 02:38:18Z]   hypothesis: Deferred-padding-mask candidate.
+[2026-08-31 02:38:18Z] evaluating v018_deferred_padding_mask_candidate.py on profile=general (timeout 40m)
+[2026-08-31 02:42:55Z] evaluation finished in 277s (rc=0)
+[2026-08-31 02:42:55Z] IMPROVED 1.7858 -> 1.9141 (v018_deferred_padding_mask_candidate.py)
+[2026-08-31 02:42:55Z] iteration 3 took 295s
