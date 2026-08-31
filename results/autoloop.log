@@ -153,3 +153,14 @@
 [2026-08-31 02:49:53Z] evaluation finished in 21s (rc=0)
 [2026-08-31 02:49:53Z] no improvement (champion still 1.9141), flat=4
 [2026-08-31 02:49:53Z] iteration 7 took 127s
+[2026-08-31 02:49:56Z] pushed: iteration 7 — v022_fused_ffn_candidate.py rejected, champion 1.9141
+[2026-08-31 02:49:59Z] --- iteration 8/120 --- route=STRUCTURAL profile=launch parent=v018_deferred_padding_mask_candidate.py beam=2 flat=4 best=1.9141 elapsed=0.2h (13/13 shapes >4.0x off SOL)
+[2026-08-31 02:49:59Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 1037x off SOL (memory-bound), case 3 465x off SOL (compute-bound), case 7 284x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate k
+[2026-08-31 02:49:59Z]   asking the model for a candidate...
+[2026-08-31 02:50:42Z] wrote v023_hoisted_attention_mask_candidate.py (138 lines)
+[2026-08-31 02:50:42Z]   hypothesis: Hoisted-attention-mask candidate.
+[2026-08-31 02:50:42Z] evaluating v023_hoisted_attention_mask_candidate.py on profile=launch (timeout 40m)
+[2026-08-31 02:53:15Z] evaluation finished in 153s (rc=1)
+[2026-08-31 02:53:15Z] race.py exited 1
+[2026-08-31 02:53:15Z] stop: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
+[2026-08-31 02:53:15Z] wrote results/STATUS.md
