@@ -133,3 +133,13 @@
 [2026-08-31 02:44:39Z] evaluation finished in 22s (rc=0)
 [2026-08-31 02:44:39Z] no improvement (champion still 1.9141), flat=2
 [2026-08-31 02:44:39Z] iteration 5 took 41s
+[2026-08-31 02:44:41Z] pushed: iteration 5 — v020_boolean_mask_attention_candidate.py rejected, champion 1.9141
+[2026-08-31 02:44:45Z] --- iteration 6/120 --- route=STRUCTURAL profile=general parent=v018_deferred_padding_mask_candidate.py beam=2 flat=2 best=1.9141 elapsed=0.1h (13/13 shapes >4.0x off SOL)
+[2026-08-31 02:44:45Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 1037x off SOL (memory-bound), case 3 465x off SOL (compute-bound), case 7 284x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate k
+[2026-08-31 02:44:45Z]   asking the model for a candidate...
+[2026-08-31 02:45:24Z] wrote v021_short_sequence_mask_dispatch.py (126 lines)
+[2026-08-31 02:45:24Z]   hypothesis: Short-sequence mask-dispatch candidate.
+[2026-08-31 02:45:24Z] evaluating v021_short_sequence_mask_dispatch.py on profile=general (timeout 40m)
+[2026-08-31 02:47:40Z] evaluation finished in 136s (rc=0)
+[2026-08-31 02:47:40Z] no improvement (champion still 1.9141), flat=3
+[2026-08-31 02:47:40Z] iteration 6 took 174s
