@@ -1,0 +1,83 @@
+{
+  "candidate": "v042_torchscript_dispatched_native_encoder.py",
+  "candidate_doc": "TorchScript-dispatched native encoder-layer candidate.\n\nHypothesis: replacing each launch-heavy sequence of normalization, attention,\nresidual, GELU, and FFN operators with PyTorch's native fused encoder-layer\noperator reduces framework dispatch and intermediate-kernel launches on short\nsequences. Long sequences retain SDPA so the implementation remains feasible\nwhen materializing an attention score matrix would be prohibitive.",
+  "incumbent": "v038_torchscript_dispatched_transformer_candidate.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-31T05:20:27",
+  "cases": [
+    {
+      "case": 1,
+      "shape": {
+        "case": 1,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.016,
+      "status": "build_error",
+      "error": "RuntimeError: \nArguments for call are not valid.\nThe following variants are available:\n  \n  aten::eq.Tensor(Tensor self, Tensor other) -> Tensor:\n  Expected a value of type 'Tensor' for argument 'self' but instead found type 'Optional[int]'.\n  \n  aten::eq.Scalar(Tensor self, Scalar other) -> Tensor:\n  Expected a value of type 'Tensor' for argument 'self' but instead found type 'Optional[int]'.\n  \n  aten::eq.Scalar_out(Tensor self, Scalar other, *, Tensor(a!) out) -> Tensor(a!):\n  Expected a value of type 'Tensor' for argument 'self' but instead found type 'Optional[int]'.\n  \n  aten::eq.Tensor_out(Tensor self, Tensor other, *, Tensor(a!) out) -> Tensor(a!):\n  Expected a value of type 'Tensor' for argument 'self' but instead found type 'Optional[int]'.\n  \n  aten::eq.int_list(int[] a, int[] b) -> bool:\n  Expected a value of type 'List[int]' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.device(Device a, Device b) -> bool:\n  Expected a value of type 'Device' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.bool(bool a, bool b) -> bool:\n  Expected a value of type 'bool' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.enum(AnyEnumType a, AnyEnumType b) -> bool:\n  Expected a value of type 'AnyEnumType' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.int(int a, int b) -> bool:\n  Expected a value of type 'int' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.complex(complex a, complex b) -> bool:\n  Expected a value of type 'complex' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.float(float a, float b) -> bool:\n  Expected a value of type 'float' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.int_float(int a, float b) -> bool:\n  Expected a value of type 'int' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.float_int(float a, int b) -> bool:\n  Expected a value of type 'float' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.float_complex(float a, complex b) -> bool:\n  Expected a value of type 'float' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.complex_float(complex a, float b) -> bool:\n  Expected a value of type 'complex' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq(Scalar a, Scalar b) -> bool:\n  Expected a value of type 'number' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.str(str a, str b) -> bool:\n  Expected a value of type 'str' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.float_list(float[] a, float[] b) -> bool:\n  Expected a value of type 'List[float]' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.Tensor_list(Tensor[] a, Tensor[] b) -> bool:\n  Expected a value of type 'List[Tensor]' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.bool_list(bool[] a, bool[] b) -> bool:\n  Expected a value of type 'List[bool]' for argument 'a' but instead found type 'Optional[int]'.\n  \n  aten::eq.str_list(str[] a, str[] b) -> bool:\n  Expected a value of type 'List[str]' for argument 'a' but instead found type 'Optional[int]'.\n  \n  eq(float a, Tensor b) -> Tensor:\n  Expected a value of type 'float' for argument 'a' but instead found type 'Optional[int]'.\n  \n  eq(int a, Tensor b) -> Tensor:\n  Expected a value of type 'int' for argument 'a' but instead found type 'Optional[int]'.\n  \n  eq(complex a, Tensor b) -> Tensor:\n  Expected a value of type 'complex' for argument 'a' but instead found type 'Optional[int]'.\n\nThe original call is:\n  File \"/workspace/techjam/candidates/v042_torchscript_dispatched_native_encoder.py\", line 74\n    \n        sdpa_mask = attn_mask\n        if attn_mask is not None and mask_type == 1:\n                                     ~~~~~~~~~~~~~~ <--- HERE\n            sdpa_mask = attn_mask[:, None, None, :]\n    \n'Block._sdpa_forward' is being compiled since it was called from 'Block.forward'\n  File \"/workspace/techjam/candidates/v042_torchscript_dispatched_native_encoder.py\", line 137\n            )\n    \n        return self._sdpa_forward(\n               ~~~~~~~~~~~~~~~~~~~\n            x,\n            ~~\n            attn_mask,\n            ~~~~~~~~~~\n            mask_type,\n            ~~~~~~~~~~\n            causal,\n            ~~~~~~ <--- HERE\n        )\n"
+    },
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "status": "build_error",
+      "error": "RuntimeError: Can't redefine method: forward on class: __torch__.candidate.Block (of Python compilation unit at: 0x35636dc0)"
+    },
+    {
+      "case": 12,
+      "shape": {
+        "case": 12,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 32,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "status": "build_error",
+      "error": "RuntimeError: Can't redefine method: forward on class: __torch__.candidate.Block (of Python compilation unit at: 0x35636dc0)"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 96
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 96
+  },
+  "env_unchanged": true,
+  "failed_cases": [
+    1,
+    2,
+    12
+  ],
+  "n_scored": 0,
+  "geomean_speedup": 0.0,
+  "score": 0.0
+}
