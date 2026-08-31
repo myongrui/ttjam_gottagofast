@@ -451,3 +451,6 @@
 [2026-08-31 12:59:35Z] evaluation finished in 180s (rc=0)
 [2026-08-31 12:59:35Z] no improvement (champion still 2.2969), flat=5
 [2026-08-31 12:59:35Z] iteration 5 took 380s
+[2026-08-31 12:59:38Z] pushed: iteration 5 — v048_build_time_attention_mask.py rejected, champion 2.2969
+[2026-08-31 12:59:38Z] stop: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
+[2026-08-31 12:59:38Z] wrote results/STATUS.md
