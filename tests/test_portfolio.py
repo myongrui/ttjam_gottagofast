@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 
 import build_dispatcher  # noqa: E402
-import ledger  # noqa: E402
+import event_store as ledger  # noqa: E402
 import search_stats  # noqa: E402
 
 
@@ -18,6 +18,7 @@ def entry(candidate, score, per_case, decision=None, dtype="float32"):
         "candidate": candidate,
         "score": score,
         "dtype": dtype,
+        "gpu": "NVIDIA A100-SXM4-80GB",
         "env_unchanged": True,
         "per_case": per_case,
     }

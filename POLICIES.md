@@ -8,7 +8,7 @@ than a rewrite.
 
 ## ACTIVE — P2: portfolio search (beam + per-shape archive + racing)
 
-Implemented in `tools/ledger.py` (`global_beam`, `per_shape_elites`,
+Implemented in `tools/event_store.py` (`global_beam`, `per_shape_elites`,
 `decision_from_report`), `tools/race.py`, `tools/build_dispatcher.py`.
 
 Global beam of 3 promoted full-sweep parents; per-shape archive of the 2 fastest
@@ -39,8 +39,8 @@ portfolio search replaced it.
   from separate processes, inheriting clock, thermal and allocator drift; kept
   only one incumbent, maximising local-optimum exposure; discarded specialists
   outright; and always paid for a full sweep.
-* **What it got right, and P2 kept** — a hard correctness gate, an append-only
-  ledger including failures and their reasons, and refusing to rank scores
+* **What it got right, and P2 kept** — a hard correctness gate, append-only
+  canonical events including failures and their reasons, and refusing to rank scores
   across different case sets.
 
 ---
@@ -49,8 +49,8 @@ portfolio search replaced it.
 
 Route each iteration to *tuning* or *structural change* by measured gap to the
 hardware roofline. Implemented in `tools/routing.py` (`decide`), driven by `tools/roofline.py`.
-Runs every cycle inside `autoloop.py` at zero cost — it is arithmetic over the
-ledger and the roofline, with no model in the path.
+Runs when Codex calls `tools/controller.py route`; it is arithmetic over
+hardware-scoped canonical events and the roofline, with no model in the path.
 
 ```
 TUNE --plateau (K configs, no gain > 2% noise margin)--> gap to SOL?
@@ -90,13 +90,12 @@ STRUCTURAL --wins--> TUNE (retune the new structure)
 |---|---|---|
 | Beam of 3 / elites of 2 over four candidates retains everything — selection pressure in name only | Widths scale with the eligible pool: beam 1 → 2 → 3 at 2 / 5 / 6+ candidates | `routing.adaptive_widths` |
 | Screening on a hypothesis-chosen profile selects for candidates suited to that profile | A neutral `general` profile is forced every third cycle, and screen-`promote`-then-full-fail is counted and surfaced | `routing.choose_profile`, `routing.screen_bias` |
-| Solves selection, not proposal — silent on tune vs restructure | P1 routes every cycle and injects the required move into the generation prompt | `routing.decide` → `autoloop.build_prompt` |
-| No mechanical tuning — every iteration paid a model even for parameter search | `TUNE` runs a config sweep with **no model call**; only when it is exhausted does the loop pay for a structural proposal | `routing.tuning_state` → `autoloop.run_tuning` → `tools/tuner.py` |
+| Solves selection, not proposal — silent on tune vs restructure | P1 gives Codex deterministic routing evidence while Codex chooses the hypothesis | `controller.py route` → `routing.decide` |
+| Mechanical tuning needs no research-model call | `TUNE` remains a deterministic config sweep whose raw outputs become referenced evidence | `routing.tuning_state` → `tools/tuner.py` |
 
 ## Assessment
 
-With four candidates on the board and every shape 10–1000x off SOL, **search
-policy is still not the binding constraint** — P0 and P2 would both pick v001.
-The constraint is the candidate pool, which is why P1's contribution is steering
-generation rather than filtering results. The next real gain remains structural
-(backlog item 2, the host-device sync), not more search machinery.
+Across the 60 migrated evaluations, the A100-80GB full-sweep lineage ends at
+`v038` with 2.2969x and later compatible candidates do not clear the unchanged
+promotion gate. Routing therefore calls for another structural hypothesis;
+search policy is not evidence that a specific untested mechanism will win.

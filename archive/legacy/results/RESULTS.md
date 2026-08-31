@@ -1,6 +1,6 @@
 # Current best submission
 
-_Regenerated 2026-08-31 14:14:50Z from commit `46f9458`. Do not edit — `tools/report.py` overwrites this file._
+_Regenerated 2026-08-31 12:59:38Z from commit `78d67c1`. Do not edit — `tools/report.py` overwrites this file._
 
 
 | | |
@@ -8,12 +8,11 @@ _Regenerated 2026-08-31 14:14:50Z from commit `46f9458`. Do not edit — `tools/
 | **Composition** | 1 generalist + 1 specialist(s) |
 | **Generalist (fallback)** | `v038_torchscript_dispatched_transformer_candidate.py` |
 | **Generalist alone, 13-case geomean** | **2.2969x** |
-| **Composed, per-shape best** | **2.3090x** |
-| Dispatcher gain over generalist | +0.5% |
+| **Composed, per-shape best** | **2.3147x** |
+| Dispatcher gain over generalist | +0.8% |
 | Measured on | NVIDIA A100-SXM4-80GB, float32 |
 | Champion decision | `promote` over 13 cases |
-| Evaluations recorded | 60 |
-| Evidence class | migrated archived evidence until a new live run is appended |
+| Attempts recorded | 60 |
 
 ## Per-shape selection
 
@@ -27,7 +26,7 @@ _Regenerated 2026-08-31 14:14:50Z from commit `46f9458`. Do not edit — `tools/
 | 6 | 10000 | 128 | 128 | 4 | `v038_torchscript_dispatched_transformer_candidate.py` | 2.1738x | generalist |
 | 7 | 64 | 128 | 32 | 4 | `v038_torchscript_dispatched_transformer_candidate.py` | 2.3359x | generalist |
 | 8 | 64 | 128 | 1024 | 4 | `v038_torchscript_dispatched_transformer_candidate.py` | 1.1250x | generalist |
-| 9 | 64 | 128 | 128 | 1 | `v024_centralized_attention_mask_dispatch.py` **·** | 1.7763x | proven |
+| 9 | 64 | 128 | 128 | 1 | `v024_centralized_attention_mask_dispatch.py` **·** | 1.8340x | proven |
 | 10 | 64 | 128 | 128 | 2 | `v038_torchscript_dispatched_transformer_candidate.py` | 1.9638x | generalist |
 | 11 | 64 | 128 | 128 | 16 | `v038_torchscript_dispatched_transformer_candidate.py` | 2.8514x | generalist |
 | 12 | 64 | 32 | 128 | 4 | `v038_torchscript_dispatched_transformer_candidate.py` | 2.5213x | generalist |
@@ -40,12 +39,11 @@ _Regenerated 2026-08-31 14:14:50Z from commit `46f9458`. Do not edit — `tools/
 
 Retained because they beat the generalist on their own shape, even where they lose overall.
 
-- **case 9** — `v024_centralized_attention_mask_dispatch.py` at 1.7763x vs generalist 1.6592x (+7.1%), evidence: proven
+- **case 9** — `v024_centralized_attention_mask_dispatch.py` at 1.8340x vs generalist 1.6592x (+10.5%), evidence: proven
 
 ## How to reproduce
 
 ```bash
-python3 tools/controller.py contract  # show and confirm exact hash
-# After start/resume confirmation and separate paid-GPU authorization:
-python3 tools/controller.py evaluate candidates/v038_torchscript_dispatched_transformer_candidate.py --cases 1,2,3,4,5,6,7,8,9,10,11,12,13 --contract-hash <confirmed-hash> --paid-gpu-authorized
+tools/iterate.sh candidates/v038_torchscript_dispatched_transformer_candidate.py 1,2,3,4,5,6,7,8,9,10,11,12,13 float32
+python3 tools/build_dispatcher.py   # compose the specialists
 ```

@@ -2,7 +2,7 @@
 """Stage a small portfolio of challengers against the current champion.
 
 All challengers first run on a hypothesis-relevant screen. Their screen runs
-remain in the append-only ledger and can update the per-shape elite archive even
+remain in the canonical append-only event store and can update the per-shape archive even
 when they do not advance. The strongest valid screen result is then promoted to
 the expensive 13-case paired sweep.
 """
@@ -13,12 +13,13 @@ import json
 import os
 import subprocess
 import sys
+import uuid
 from pathlib import Path
 from typing import Any, Dict, List
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
-import ledger  # noqa: E402
+import event_store  # noqa: E402
 
 
 PROFILES = {
@@ -35,21 +36,29 @@ PROFILES = {
 }
 
 
-def report_path(candidate: str) -> Path:
-    return ROOT / "results" / f"{Path(candidate).stem}.json"
-
-
 def run_iteration(candidate: str, cases: str, dtype: str,
                   incumbent: str) -> Dict[str, Any]:
+    scope = cases.replace(",", "-")
+    relative_report = Path("results") / "evaluations" / (
+        f"{Path(candidate).stem}__cases-{scope}__{uuid.uuid4().hex}.json")
     command = [str(ROOT / "tools" / "iterate.sh"), candidate, cases, dtype]
     if incumbent:
         command.append(incumbent)
+    else:
+        command.append("")
+    command.append(str(relative_report))
     completed = subprocess.run(command, cwd=ROOT)
     if completed.returncode:
         raise RuntimeError(
             f"iteration failed for {candidate} with exit {completed.returncode}")
-    with report_path(candidate).open() as f:
-        return json.load(f)
+    with (ROOT / relative_report).open() as f:
+        report = json.load(f)
+    if report.get("gpu") != event_store.target_gpu():
+        raise RuntimeError(f"evaluation hardware {report.get('gpu')!r} does not match "
+                           f"research contract {event_store.target_gpu()!r}")
+    if report.get("dtype") != dtype:
+        raise RuntimeError(f"evaluation dtype {report.get('dtype')!r} does not match {dtype!r}")
+    return report
 
 
 def screen_score(report: Dict[str, Any]) -> float:
@@ -80,7 +89,7 @@ def main() -> int:
                              "general, or case:N")
     parser.add_argument("--dtype", default="float32")
     parser.add_argument("--incumbent", default="",
-                        help="freeze a specific incumbent; default ledger champion")
+                        help="freeze a specific incumbent; default scoped champion")
     parser.add_argument("--screen-only", action="store_true")
     parser.add_argument("--advance-floor", type=float, default=0.99,
                         help="minimum paired screen ratio for a sole challenger")
@@ -89,9 +98,10 @@ def main() -> int:
     cases = resolve_cases(args.profile)
     incumbent = args.incumbent
     if not incumbent:
-        best = ledger.champion(ledger.FULL_CASES, dtype=args.dtype)
+        best = event_store.champion(event_store.FULL_CASES, dtype=args.dtype,
+                                    gpu=event_store.target_gpu())
         if not best:
-            raise SystemExit("no full-sweep incumbent in the ledger")
+            raise SystemExit("no full-sweep incumbent in the canonical event store")
         incumbent = str(Path("candidates") / best["candidate"])
 
     frozen_name = os.path.basename(incumbent)
@@ -124,7 +134,7 @@ def main() -> int:
         return 0
 
     print(f"\nfull-sweep finalist: {Path(finalist).name}")
-    full = run_iteration(finalist, ledger.FULL_CASES, args.dtype, incumbent)
+    full = run_iteration(finalist, event_store.FULL_CASES, args.dtype, incumbent)
     comparison = full.get("incumbent_comparison") or {}
     ratio = comparison.get("paired_geomean")
     ci = comparison.get("paired_geomean_ci95")

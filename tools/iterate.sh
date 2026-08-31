@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# iterate.sh <candidate.py> [cases] [dtype] [incumbent.py]
+# iterate.sh <candidate.py> [cases] [dtype] [incumbent.py] [report.json]
 #
 # One evaluation cycle. If incumbent.py is omitted, the current full-sweep
-# champion for the dtype is selected from the ledger and timed directly beside
+# champion for the contract hardware and dtype is selected from canonical events
 # the challenger.
 #
-#   sync candidate to the pod -> evaluate -> pull the report -> record in ledger
+#   sync candidate to the pod -> evaluate -> pull immutable report -> append events
 #
 # Exits non-zero if the pod is unreachable so the caller can restart it rather
 # than recording a bogus zero score for a candidate that never actually ran.
@@ -16,10 +16,15 @@ CASES="${2:-1,2,3,4,5,6,7,8,9,10,11,12,13}"
 DTYPE="${3:-float32}"
 INCUMBENT="${4:-}"
 NAME="$(basename "$CAND" .py)"
-REPORT="results/${NAME}.json"
+REPORT="${5:-results/evaluations/${NAME}__$(date -u +%Y%m%dT%H%M%SZ)__$$.json}"
+
+if [ -e "$REPORT" ]; then
+  echo "REFUSING_TO_OVERWRITE_IMMUTABLE_REPORT: $REPORT"; exit 6
+fi
+mkdir -p "$(dirname "$REPORT")"
 
 if [ -z "$INCUMBENT" ]; then
-  CHAMPION="$(python3 tools/ledger.py champion "$DTYPE" 2>/dev/null || true)"
+  CHAMPION="$(python3 tools/event_store.py champion --dtype "$DTYPE" 2>/dev/null || true)"
   if [ -n "$CHAMPION" ]; then
     INCUMBENT="candidates/$CHAMPION"
   fi
@@ -39,6 +44,7 @@ if [ -n "$INCUMBENT" ]; then
   SYNC_FILES+=("$INCUMBENT")
 fi
 tools/podsync /workspace/techjam "${SYNC_FILES[@]}" || exit 4
+tools/podrun "mkdir -p /workspace/techjam/$(dirname "$REPORT")" || exit 4
 
 INCUMBENT_OPT=""
 if [ -n "$INCUMBENT" ]; then
@@ -47,7 +53,7 @@ fi
 
 tools/podrun "cd /workspace/techjam && python tools/harness.py \
   --candidate $CAND $INCUMBENT_OPT --cases $CASES --dtype $DTYPE --repeats 30 \
-  --out results/${NAME}.json 2>&1 | tail -40"
+  --out $REPORT 2>&1 | tail -40"
 
-tools/podget "/workspace/techjam/results/${NAME}.json" "$REPORT" || exit 5
-python3 tools/ledger.py add "$REPORT"
+tools/podget "/workspace/techjam/$REPORT" "$REPORT" || exit 5
+python3 tools/event_store.py add "$REPORT"

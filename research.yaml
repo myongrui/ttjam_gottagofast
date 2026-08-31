@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "research_id": "techjam-transformer-autoresearch",
+  "objective": "Improve the official transformer forward-pass benchmark without changing its contract.",
+  "lead_researcher": "codex",
+  "target": {
+    "dtype": "float32",
+    "hardware": {
+      "accelerator": "NVIDIA A100-SXM4-80GB",
+      "memory_gb": 80
+    },
+    "full_sweep_cases": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+    "feasibility_only_cases": [14]
+  },
+  "promotion": {
+    "method": "paired_bootstrap_ci95",
+    "minimum_lower_bound": 1.02,
+    "full_sweep_only": true,
+    "correctness_gate": "all_cases_and_environment_integrity"
+  },
+  "ownership": {
+    "codex": ["evidence_review", "hypothesis_generation", "candidate_editing", "result_interpretation", "direction_selection"],
+    "deterministic_code": ["correctness", "benchmarking", "promotion", "timeouts", "recovery", "persistence"]
+  },
+  "canonical_history": "research/events.jsonl",
+  "immutable_evidence": ["candidates/**/*.py", "results/**/*.json", "results/**/*.log", "archive/legacy/**"],
+  "generated_views": ["results/RESULTS.md", "results/STATUS.md"],
+  "prohibited": [
+    "modify_benchmark_contract",
+    "modify_baseline_implementation",
+    "modify_existing_candidate_implementations",
+    "modify_official_shapes",
+    "modify_correctness_thresholds",
+    "modify_promotion_mathematics",
+    "modify_historical_raw_results",
+    "run_paid_gpu_without_separate_user_authorization",
+    "install_feynman",
+    "rewrite_git_history",
+    "multi_gpu_scheduling"
+  ]
+}

@@ -24,7 +24,7 @@ length, dimensions, heads and causal mode.
 selection once when the model is built, so there is no shape-dispatch overhead
 on every forward pass.
 
-## Current autoloop implementation
+## Canonical autoresearch implementation
 
 ### Model layer — invent the structure
 - New fusion
@@ -51,23 +51,27 @@ on every forward pass.
 Do not concurrently edit these shared control files:
 
 - `tools/harness.py`
-- `tools/ledger.py`
+- `tools/event_store.py`
 - `tools/iterate.sh`
-- `results/ledger.jsonl`
+- `research/events.jsonl`
 
 ## Building the final submission
 
 After different shape specialists become proven elites:
 
 ```bash
-python3 tools/build_dispatcher.py --out candidates/v010_portfolio.py
-python3 tools/race.py --profile general candidates/v010_portfolio.py
+python3 tools/controller.py contract
+# After the user confirms that exact contract:
+python3 tools/build_dispatcher.py --out candidates/v049_portfolio.py
+python3 tools/controller.py race --contract-hash <confirmed-hash> \
+  --paid-gpu-authorized --profile general candidates/v049_portfolio.py
 ```
 
 The dispatcher uses the global champion as the fallback for unknown shapes.
-Right now every proven float32 elite is still `v001`, so generating it today
-would route every published shape to `v001`. Regenerate it after a specialist
-is proven.
+For the approved A100-80GB float32 scope, migrated archived evidence keeps
+`v038_torchscript_dispatched_transformer_candidate.py` as the 2.2969x fallback
+and selects `v024_centralized_attention_mask_dispatch.py` as the proven case-9
+specialist after applying the unchanged 2% dispatcher margin.
 
 For the detailed model-facing search policy and established findings, read
 `LOOP.md`.
