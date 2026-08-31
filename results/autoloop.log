@@ -421,3 +421,13 @@
 [2026-08-31 12:35:41Z] evaluation finished in 182s (rc=0)
 [2026-08-31 12:35:41Z] no improvement (champion still 2.2969), flat=2
 [2026-08-31 12:35:41Z] iteration 2 took 346s
+[2026-08-31 12:35:43Z] pushed: iteration 2 — v045_composed_single_token_attention.py rejected, champion 2.2969
+[2026-08-31 12:35:48Z] --- iteration 3/20 --- route=STRUCTURAL profile=general parent=v038_torchscript_dispatched_transformer_candidate.py beam=3 flat=2 best=2.2969 elapsed=0.1h (13/13 shapes >4.0x off SOL; 3 runs without promotion)
+[2026-08-31 12:35:48Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 366x off SOL (memory-bound), case 3 190x off SOL (compute-bound), case 7 136x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 12:35:48Z]   asking the model for a candidate...
+[2026-08-31 12:40:04Z] wrote v046_synchronization_free_memory_efficient.py (219 lines)
+[2026-08-31 12:40:04Z]   hypothesis: Synchronization-free memory-efficient-attention transformer.
+[2026-08-31 12:40:04Z] evaluating v046_synchronization_free_memory_efficient.py on profile=general (timeout 40m)
+[2026-08-31 12:45:07Z] evaluation finished in 303s (rc=0)
+[2026-08-31 12:45:07Z] no improvement (champion still 2.2969), flat=3
+[2026-08-31 12:45:07Z] iteration 3 took 560s
