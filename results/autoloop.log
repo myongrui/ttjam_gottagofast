@@ -316,3 +316,5 @@
 [2026-08-31 04:23:16Z] evaluation finished in 22s (rc=0)
 [2026-08-31 04:23:16Z] no improvement (champion still 2.0916), flat=4
 [2026-08-31 04:23:16Z] iteration 4 took 66s
+[2026-08-31 04:23:19Z] pushed: iteration 4 — v036_native_encoder_fast_path.py rejected, champion 2.0916
+[2026-08-31 04:23:19Z] aborting on KeyboardInterrupt
