@@ -393,3 +393,20 @@
 [2026-08-31 05:25:59Z] pushed: iteration 6 — v043_shape_dispatched_native_encoder.py rejected, champion 2.2969
 [2026-08-31 05:25:59Z] stop: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
 [2026-08-31 05:25:59Z] wrote results/STATUS.md
+[2026-08-31 05:26:02Z] pushed: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
+[2026-08-31 05:26:04Z] pod 2v992jh5vuhb6r: stop requested
+[2026-08-31 12:19:32Z] pod start failed: HTTP 400 {"detail":"There are not enough free GPUs on the host machine to start this pod.","status":400,"title":"Bad Request"}
+
+[2026-08-31 12:22:41Z] pod ready after 1 probe(s)
+[2026-08-31 12:27:48Z] pod 132yirw3l7rq7s: start requested
+[2026-08-31 12:27:58Z] pod ready after 1 probe(s)
+[2026-08-31 12:27:58Z] start model=gpt-5.6-sol effort=high profile=auto incumbent=v038_torchscript_dispatched_transformer_candidate.py score=2.2969
+[2026-08-31 12:28:07Z] --- iteration 1/20 --- route=STRUCTURAL profile=launch parent=v038_torchscript_dispatched_transformer_candidate.py beam=3 flat=0 best=2.2969 elapsed=0.0h (13/13 shapes >4.0x off SOL)
+[2026-08-31 12:28:07Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 366x off SOL (memory-bound), case 3 190x off SOL (compute-bound), case 7 136x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 12:28:07Z]   asking the model for a candidate...
+[2026-08-31 12:29:10Z] wrote v044_synchronization_free_compiled_transformer.py (207 lines)
+[2026-08-31 12:29:10Z]   hypothesis: Synchronization-free compiled transformer candidate.
+[2026-08-31 12:29:10Z] evaluating v044_synchronization_free_compiled_transformer.py on profile=launch (timeout 40m)
+[2026-08-31 12:29:47Z] evaluation finished in 37s (rc=0)
+[2026-08-31 12:29:47Z] no improvement (champion still 2.2969), flat=1
+[2026-08-31 12:29:47Z] iteration 1 took 100s

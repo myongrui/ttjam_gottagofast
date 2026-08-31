@@ -1,0 +1,191 @@
+{
+  "candidate": "v044_synchronization_free_compiled_transformer.py",
+  "candidate_doc": "Synchronization-free compiled transformer candidate.\n\nHypothesis: removing the data-dependent host read of valid_token_mask allows\ntorch.compile's reduce-overhead mode to capture each mask specialization as one\nuninterrupted graph. Inductor can then fuse mask construction and adjacent\npointwise residual, normalization, and GELU operations while CUDA graphs remove\nrepeated launch and Python-dispatch overhead on latency-bound short shapes.",
+  "incumbent": "v038_torchscript_dispatched_transformer_candidate.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-31T12:29:26",
+  "cases": [
+    {
+      "case": 1,
+      "shape": {
+        "case": 1,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 1.430511474609375e-06,
+            "max_rel": 0.03679780289530754
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 1.6689300537109375e-06,
+            "max_rel": 0.027026992291212082
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 4.0531158447265625e-06,
+            "max_rel": 2.333334445953369
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 1.430511474609375e-06,
+            "max_rel": 0.040995579212903976
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 1.6689300537109375e-06,
+            "max_rel": 0.15000005066394806
+          }
+        ]
+      },
+      "input_dependence_ok": false,
+      "status": "integrity_failed",
+      "error": "output did not respond to a changed input (caching?)"
+    },
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 1.1920928955078125e-06,
+            "max_rel": 0.0004524706455413252
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 1.430511474609375e-06,
+            "max_rel": 0.0006621583015657961
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 2.086162567138672e-06,
+            "max_rel": 0.004402590449899435
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 1.1920928955078125e-06,
+            "max_rel": 0.0004899610066786408
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 1.1920928955078125e-06,
+            "max_rel": 0.00016537746705580503
+          }
+        ]
+      },
+      "input_dependence_ok": false,
+      "status": "integrity_failed",
+      "error": "output did not respond to a changed input (caching?)"
+    },
+    {
+      "case": 12,
+      "shape": {
+        "case": 12,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 32,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 1.3113021850585938e-06,
+            "max_rel": 0.047945234924554825
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 1.9073486328125e-06,
+            "max_rel": 0.005882378667593002
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 2.6226043701171875e-06,
+            "max_rel": 0.07407426834106445
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 1.1920928955078125e-06,
+            "max_rel": 0.007514388766139746
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 1.430511474609375e-06,
+            "max_rel": 0.004268895834684372
+          }
+        ]
+      },
+      "input_dependence_ok": false,
+      "status": "integrity_failed",
+      "error": "output did not respond to a changed input (caching?)"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 32
+  },
+  "env_unchanged": true,
+  "failed_cases": [
+    1,
+    2,
+    12
+  ],
+  "n_scored": 0,
+  "geomean_speedup": 0.0,
+  "score": 0.0
+}
