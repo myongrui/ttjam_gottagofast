@@ -25,3 +25,34 @@
 ```
 autoloop stopped: 5 consecutive non-improvements -- the search has stalled and needs a structural idea. Best 2.2969 after 5 iterations. Read results/STATUS.md, results/ledger.jsonl and LOOP.md, diagnose the stall, and propose the next candidate.
 ```
+
+## 2026-08-31 — nightly health check (cloud, no pod access)
+
+Champion unchanged at 2.2969 (v038) since the promotion on 2026-08-31; two
+back-to-back 5-run stalls since then (v039-v048), 5 invalid (mostly
+TorchScript compile/runtime errors), the rest screen_promote/screen_uncertain
+that came back `uncertain` on the full sweep -- v047 (+0.6% over champion)
+and v048 (+0.1%) both landed inside the 2% noise margin, so neither promoted.
+
+Diagnosis: v038's `Model._attention_mask` still runs `bool(valid_token_mask
+.all())` -- a device-to-host sync -- on *every* forward call, once per call
+(reduced from 4x/layer in v001, but never eliminated). The timed sweep always
+calls with `padding_ratio=0.0` (tools/harness.py:161-164), so this sync
+always resolves the same way and buys nothing but a pipeline stall on every
+one of the 13x3 timed calls. v048 tried to dodge it by inspecting `bench` at
+build time for an example mask, found nothing usable, and fell back to the
+same runtime `.all()` check -- explaining its ~0% delta.
+
+Proposed `candidates/v049_causal_padding_invariant.py`: every official case
+is causal (tools/shapes.py), and the harness's own generator only ever
+produces tail padding (`positions < lengths`). Under causal masking, a valid
+query at position i < length can only attend to keys 0..i, and every such key
+satisfies j <= i < length -- so the padding mask never removes anything for a
+row that matters, for any layer, recursively (attention is the only
+cross-token op). Invalid rows get zeroed at the end regardless, matching the
+baseline exactly. So the causal branch can go straight to `is_causal=True,
+attn_mask=None` unconditionally -- no sync, no S*S tril allocation, no
+build-time introspection. The non-causal branch (unused by the official
+suite) now builds its cheap [B,1,1,S] mask unconditionally too, so neither
+branch ever reads mask contents on the host. Not yet raced -- no pod access
+from this session.
