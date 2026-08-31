@@ -269,3 +269,6 @@
 [2026-08-31 03:50:14Z] evaluation finished in 29s (rc=0)
 [2026-08-31 03:50:14Z] no improvement (champion still 2.0916), flat=5
 [2026-08-31 03:50:14Z] iteration 5 took 89s
+[2026-08-31 03:50:17Z] pushed: iteration 5 — v032_final_layernorm_plus_padding.py rejected, champion 2.0916
+[2026-08-31 03:50:17Z] stop: 5 consecutive non-improvements -- the search has stalled and needs a structural idea
+[2026-08-31 03:50:17Z] wrote results/STATUS.md
