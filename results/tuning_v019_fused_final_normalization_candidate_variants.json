@@ -1,0 +1,162 @@
+[
+  {
+    "name": "stages1_warps1",
+    "config": {
+      "num_stages": 1,
+      "num_warps": 1
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages1_warps1.py"
+  },
+  {
+    "name": "stages1_warps2",
+    "config": {
+      "num_stages": 1,
+      "num_warps": 2
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages1_warps2.py"
+  },
+  {
+    "name": "stages1_warps4",
+    "config": {
+      "num_stages": 1,
+      "num_warps": 4
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages1_warps4.py"
+  },
+  {
+    "name": "stages1_warps8",
+    "config": {
+      "num_stages": 1,
+      "num_warps": 8
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages1_warps8.py"
+  },
+  {
+    "name": "stages1_warps16",
+    "config": {
+      "num_stages": 1,
+      "num_warps": 16
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages1_warps16.py"
+  },
+  {
+    "name": "stages2_warps1",
+    "config": {
+      "num_stages": 2,
+      "num_warps": 1
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages2_warps1.py"
+  },
+  {
+    "name": "stages2_warps2",
+    "config": {
+      "num_stages": 2,
+      "num_warps": 2
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages2_warps2.py"
+  },
+  {
+    "name": "stages2_warps4",
+    "config": {
+      "num_stages": 2,
+      "num_warps": 4
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages2_warps4.py"
+  },
+  {
+    "name": "stages2_warps8",
+    "config": {
+      "num_stages": 2,
+      "num_warps": 8
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages2_warps8.py"
+  },
+  {
+    "name": "stages2_warps16",
+    "config": {
+      "num_stages": 2,
+      "num_warps": 16
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages2_warps16.py"
+  },
+  {
+    "name": "stages3_warps1",
+    "config": {
+      "num_stages": 3,
+      "num_warps": 1
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages3_warps1.py"
+  },
+  {
+    "name": "stages3_warps2",
+    "config": {
+      "num_stages": 3,
+      "num_warps": 2
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages3_warps2.py"
+  },
+  {
+    "name": "stages3_warps4",
+    "config": {
+      "num_stages": 3,
+      "num_warps": 4
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages3_warps4.py"
+  },
+  {
+    "name": "stages3_warps8",
+    "config": {
+      "num_stages": 3,
+      "num_warps": 8
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages3_warps8.py"
+  },
+  {
+    "name": "stages3_warps16",
+    "config": {
+      "num_stages": 3,
+      "num_warps": 16
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages3_warps16.py"
+  },
+  {
+    "name": "stages4_warps1",
+    "config": {
+      "num_stages": 4,
+      "num_warps": 1
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages4_warps1.py"
+  },
+  {
+    "name": "stages4_warps2",
+    "config": {
+      "num_stages": 4,
+      "num_warps": 2
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages4_warps2.py"
+  },
+  {
+    "name": "stages4_warps4",
+    "config": {
+      "num_stages": 4,
+      "num_warps": 4
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages4_warps4.py"
+  },
+  {
+    "name": "stages4_warps8",
+    "config": {
+      "num_stages": 4,
+      "num_warps": 8
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages4_warps8.py"
+  },
+  {
+    "name": "stages4_warps16",
+    "config": {
+      "num_stages": 4,
+      "num_warps": 16
+    },
+    "path": "/workspace/techjam/candidates/tuned/v019_fused_final_normalization_candidate/v019_fused_final_normalization_candidate__stages4_warps16.py"
+  }
+]

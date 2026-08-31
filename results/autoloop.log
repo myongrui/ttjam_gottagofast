@@ -211,3 +211,7 @@
 [2026-08-31 03:09:16Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 942x off SOL (memory-bound), case 3 430x off SOL (compute-bound), case 7 238x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
 [2026-08-31 03:09:16Z]   asking the model for a candidate...
 [2026-08-31 03:09:21Z] aborting on KeyboardInterrupt
+[2026-08-31 03:16:02Z] pod start failed: HTTP 409 {"detail":"action \"start\" is not valid for status \"RUNNING\"","status":409,"title":"Conflict"}
+
+[2026-08-31 03:16:07Z] pod ready after 1 probe(s)
+[2026-08-31 03:16:28Z] pod h9qpy3lmrt8be6: already running

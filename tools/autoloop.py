@@ -112,8 +112,14 @@ def pod_action(action: str) -> bool:
         log(f"pod {pod}: {action} requested")
         return True
     except urllib.error.HTTPError as e:
-        log(f"pod {action} failed: HTTP {e.code} "
-            f"{e.read()[:200].decode(errors='replace')}")
+        body = e.read()[:200].decode(errors="replace")
+        # 409 means the pod is already in the state we asked for. Starting an
+        # already-running pod is success, not failure -- treating it as failure
+        # made --start-pod abort a run whenever the pod was already up.
+        if e.code == 409 and "not valid for status" in body:
+            log(f"pod {pod}: already {'running' if action == 'start' else 'stopped'}")
+            return True
+        log(f"pod {action} failed: HTTP {e.code} {body}")
     except Exception as e:
         log(f"pod {action} failed: {type(e).__name__}: {e}")
     return False

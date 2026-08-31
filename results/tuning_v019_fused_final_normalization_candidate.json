@@ -1,0 +1,487 @@
+{
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "timestamp": "2026-08-31T03:19:34",
+  "results": [
+    {
+      "name": "stages1_warps1",
+      "config": {
+        "num_stages": 1,
+        "num_warps": 1
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6265119910240173,
+          "speedup": 1.6073069002394174
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.372160017490387,
+          "speedup": 1.8396805528858946
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4871519804000854,
+          "speedup": 1.7928389552497828
+        }
+      }
+    },
+    {
+      "name": "stages1_warps2",
+      "config": {
+        "num_stages": 1,
+        "num_warps": 2
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.622655987739563,
+          "speedup": 1.6111264286750675
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3654719591140747,
+          "speedup": 1.8486912768698935
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4838239550590515,
+          "speedup": 1.7968600612948236
+        }
+      }
+    },
+    {
+      "name": "stages1_warps4",
+      "config": {
+        "num_stages": 1,
+        "num_warps": 4
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6210079789161682,
+          "speedup": 1.6127643913529788
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3637279868125916,
+          "speedup": 1.8510554333674
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4873279929161072,
+          "speedup": 1.7926267881307356
+        }
+      }
+    },
+    {
+      "name": "stages1_warps8",
+      "config": {
+        "num_stages": 1,
+        "num_warps": 8
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6321600079536438,
+          "speedup": 1.6017448863808377
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3604799509048462,
+          "speedup": 1.8554746785836238
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4409120082855225,
+          "speedup": 1.8503725331642957
+        }
+      }
+    },
+    {
+      "name": "stages1_warps16",
+      "config": {
+        "num_stages": 1,
+        "num_warps": 16
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6461439728736877,
+          "speedup": 1.5881380909418532
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3714720010757446,
+          "speedup": 1.840603452089882
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4266879558563232,
+          "speedup": 1.868820712962296
+        }
+      }
+    },
+    {
+      "name": "stages2_warps1",
+      "config": {
+        "num_stages": 2,
+        "num_warps": 1
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6249120235443115,
+          "speedup": 1.608889532857693
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3590400218963623,
+          "speedup": 1.857440589646693
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4708159565925598,
+          "speedup": 1.8127516164666704
+        }
+      }
+    },
+    {
+      "name": "stages2_warps2",
+      "config": {
+        "num_stages": 2,
+        "num_warps": 2
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6635680198669434,
+          "speedup": 1.5715040895677685
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3596319556236267,
+          "speedup": 1.8566319283565151
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.48225599527359,
+          "speedup": 1.798760815500032
+        }
+      }
+    },
+    {
+      "name": "stages2_warps4",
+      "config": {
+        "num_stages": 2,
+        "num_warps": 4
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6619679927825928,
+          "speedup": 1.5730170243038137
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3630560040473938,
+          "speedup": 1.8519679984747435
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4706400036811829,
+          "speedup": 1.8129685009004692
+        }
+      }
+    },
+    {
+      "name": "stages2_warps8",
+      "config": {
+        "num_stages": 2,
+        "num_warps": 8
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6364480257034302,
+          "speedup": 1.597547801966575
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3614880442619324,
+          "speedup": 1.8541008202485432
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4778720140457153,
+          "speedup": 1.8040966859770713
+        }
+      }
+    },
+    {
+      "name": "stages2_warps16",
+      "config": {
+        "num_stages": 2,
+        "num_warps": 16
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6520000100135803,
+          "speedup": 1.5825084325959327
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3724159598350525,
+          "speedup": 1.8393374701996528
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4872959852218628,
+          "speedup": 1.7926653667665278
+        }
+      }
+    },
+    {
+      "name": "stages3_warps1",
+      "config": {
+        "num_stages": 3,
+        "num_warps": 1
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.642416000366211,
+          "speedup": 1.5917428628996202
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.380895972251892,
+          "speedup": 1.8280421916996976
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4994879961013794,
+          "speedup": 1.7780895944283859
+        }
+      }
+    },
+    {
+      "name": "stages3_warps2",
+      "config": {
+        "num_stages": 3,
+        "num_warps": 2
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6264000535011292,
+          "speedup": 1.6074175236697021
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3774879574775696,
+          "speedup": 1.8325649134872666
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4941120147705078,
+          "speedup": 1.784487358698913
+        }
+      }
+    },
+    {
+      "name": "stages3_warps4",
+      "config": {
+        "num_stages": 3,
+        "num_warps": 4
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6380800008773804,
+          "speedup": 1.595956207935385
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3760799765586853,
+          "speedup": 1.8344399617946037
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4997119903564453,
+          "speedup": 1.7778240222007144
+        }
+      }
+    },
+    {
+      "name": "stages3_warps8",
+      "config": {
+        "num_stages": 3,
+        "num_warps": 8
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6336959600448608,
+          "speedup": 1.6002389737336855
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3738880157470703,
+          "speedup": 1.8373667072508757
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.486799955368042,
+          "speedup": 1.7932634401903371
+        }
+      }
+    },
+    {
+      "name": "stages3_warps16",
+      "config": {
+        "num_stages": 3,
+        "num_warps": 16
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6414079666137695,
+          "speedup": 1.5927203959466423
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3624639511108398,
+          "speedup": 1.8527727633208204
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4912960529327393,
+          "speedup": 1.7878569433579714
+        }
+      }
+    },
+    {
+      "name": "stages4_warps1",
+      "config": {
+        "num_stages": 4,
+        "num_warps": 1
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6340960264205933,
+          "speedup": 1.599847196386347
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3657280206680298,
+          "speedup": 1.8483446641080736
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.491375982761383,
+          "speedup": 1.787761123725113
+        }
+      }
+    },
+    {
+      "name": "stages4_warps2",
+      "config": {
+        "num_stages": 4,
+        "num_warps": 2
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6480160355567932,
+          "speedup": 1.586334046568786
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3685439825057983,
+          "speedup": 1.8445414483519813
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4870559573173523,
+          "speedup": 1.7929547235384475
+        }
+      }
+    },
+    {
+      "name": "stages4_warps4",
+      "config": {
+        "num_stages": 4,
+        "num_warps": 4
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6572160124778748,
+          "speedup": 1.5775275684104333
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3735679984092712,
+          "speedup": 1.8377947815820308
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.516767978668213,
+          "speedup": 1.7578324703157258
+        }
+      }
+    },
+    {
+      "name": "stages4_warps8",
+      "config": {
+        "num_stages": 4,
+        "num_warps": 8
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.6304640173912048,
+          "speedup": 1.6034110036221634
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3661440014839172,
+          "speedup": 1.8477818567315587
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4806239604949951,
+          "speedup": 1.8007435202836888
+        }
+      }
+    },
+    {
+      "name": "stages4_warps16",
+      "config": {
+        "num_stages": 4,
+        "num_warps": 16
+      },
+      "cases": {
+        "1": {
+          "correct": true,
+          "ms": 1.63646399974823,
+          "speedup": 1.5975322077951406
+        },
+        "2": {
+          "correct": true,
+          "ms": 1.3754560351371765,
+          "speedup": 1.8352721098590967
+        },
+        "12": {
+          "correct": true,
+          "ms": 1.4804159998893738,
+          "speedup": 1.80099647871772
+        }
+      }
+    }
+  ]
+}

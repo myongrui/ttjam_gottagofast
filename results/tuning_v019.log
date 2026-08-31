@@ -1,0 +1,74 @@
+sending 24 file(s),    12207 bytes tarred, 32 chunks
+OK  synced to /workspace/techjam (sha256 verified, unpacked)
+stages1_warps2               case  1  ok    1.6111x
+stages1_warps4               case  1  ok    1.6128x
+stages1_warps8               case  1  ok    1.6017x
+stages1_warps16              case  1  ok    1.5881x
+stages2_warps1               case  1  ok    1.6089x
+stages2_warps2               case  1  ok    1.5715x
+stages2_warps4               case  1  ok    1.5730x
+stages2_warps8               case  1  ok    1.5975x
+stages2_warps16              case  1  ok    1.5825x
+stages3_warps1               case  1  ok    1.5917x
+stages3_warps2               case  1  ok    1.6074x
+stages3_warps4               case  1  ok    1.5960x
+stages3_warps8               case  1  ok    1.6002x
+stages3_warps16              case  1  ok    1.5927x
+stages4_warps1               case  1  ok    1.5998x
+stages4_warps2               case  1  ok    1.5863x
+stages4_warps4               case  1  ok    1.5775x
+stages4_warps8               case  1  ok    1.6034x
+stages4_warps16              case  1  ok    1.5975x
+stages1_warps1               case  2  ok    1.8397x
+stages1_warps2               case  2  ok    1.8487x
+stages1_warps4               case  2  ok    1.8511x
+stages1_warps8               case  2  ok    1.8555x
+stages1_warps16              case  2  ok    1.8406x
+stages2_warps1               case  2  ok    1.8574x
+stages2_warps2               case  2  ok    1.8566x
+stages2_warps4               case  2  ok    1.8520x
+stages2_warps8               case  2  ok    1.8541x
+stages2_warps16              case  2  ok    1.8393x
+stages3_warps1               case  2  ok    1.8280x
+stages3_warps2               case  2  ok    1.8326x
+stages3_warps4               case  2  ok    1.8344x
+stages3_warps8               case  2  ok    1.8374x
+stages3_warps16              case  2  ok    1.8528x
+stages4_warps1               case  2  ok    1.8483x
+stages4_warps2               case  2  ok    1.8445x
+stages4_warps4               case  2  ok    1.8378x
+stages4_warps8               case  2  ok    1.8478x
+stages4_warps16              case  2  ok    1.8353x
+stages1_warps1               case 12  ok    1.7928x
+stages1_warps2               case 12  ok    1.7969x
+stages1_warps4               case 12  ok    1.7926x
+stages1_warps8               case 12  ok    1.8504x
+stages1_warps16              case 12  ok    1.8688x
+stages2_warps1               case 12  ok    1.8128x
+stages2_warps2               case 12  ok    1.7988x
+stages2_warps4               case 12  ok    1.8130x
+stages2_warps8               case 12  ok    1.8041x
+stages2_warps16              case 12  ok    1.7927x
+stages3_warps1               case 12  ok    1.7781x
+stages3_warps2               case 12  ok    1.7845x
+stages3_warps4               case 12  ok    1.7778x
+stages3_warps8               case 12  ok    1.7933x
+stages3_warps16              case 12  ok    1.7879x
+stages4_warps1               case 12  ok    1.7878x
+stages4_warps2               case 12  ok    1.7930x
+stages4_warps4               case 12  ok    1.7578x
+stages4_warps8               case 12  ok    1.8007x
+stages4_warps16              case 12  ok    1.8010x
+WROTE /workspace/techjam/results/tuning_v019_fused_final_normalization_candidate.json
+__PODRUN_RC=0
+got /Users/yongrui/Projects/TechJam/results/tuning_v019_fused_final_normalization_candidate.json (   10736 bytes)
+v019_fused_final_normalization_candidate.py: 1 kernel(s), 1 launch site(s)
+generated 20 variants in candidates/tuned/v019_fused_final_normalization_candidate
+
+=== best configuration per shape ===
+  case  1: {'num_stages': 1, 'num_warps': 4}  1.6128x
+  case  2: {'num_stages': 2, 'num_warps': 1}  1.8574x
+  case 12: {'num_stages': 1, 'num_warps': 16}  1.8688x
+
+best single config: {'num_stages': 1, 'num_warps': 8}  geomean 1.7651x
+froze shape->config table into results/tuning_v019_fused_final_normalization_candidate_best.json

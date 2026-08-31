@@ -1,0 +1,33 @@
+{
+  "per_shape": {
+    "1": {
+      "config": {
+        "num_stages": 1,
+        "num_warps": 4
+      },
+      "speedup": 1.6127643913529788,
+      "ms": 1.6210079789161682
+    },
+    "2": {
+      "config": {
+        "num_stages": 2,
+        "num_warps": 1
+      },
+      "speedup": 1.857440589646693,
+      "ms": 1.3590400218963623
+    },
+    "12": {
+      "config": {
+        "num_stages": 1,
+        "num_warps": 16
+      },
+      "speedup": 1.868820712962296,
+      "ms": 1.4266879558563232
+    }
+  },
+  "global": {
+    "num_stages": 1,
+    "num_warps": 8
+  },
+  "global_geomean": 1.7650994668458169
+}

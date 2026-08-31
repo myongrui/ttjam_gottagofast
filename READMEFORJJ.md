@@ -24,6 +24,28 @@ length, dimensions, heads and causal mode.
 selection once when the model is built, so there is no shape-dispatch overhead
 on every forward pass.
 
+## Current autoloop implementation
+
+### Model layer — invent the structure
+- New fusion
+- New Triton kernel
+- Different attention implementation
+- Removed synchronization
+
+### Mechanical tuner — optimize that structure
+- Sweep BLOCK_M/N/K
+- Sweep num_warps
+- Sweep num_stages
+- Sweep vector widths and launch configurations
+- Benchmark valid combinations on relevant shapes
+- Select the best configuration per shape
+- Freeze the resulting shape-to-configuration table
+
+### Portfolio policy — decide whether it wins
+- Run the tuned candidate against the incumbent
+- Apply correctness and confidence-interval gates
+- Preserve global winners and shape specialists
+
 ## How we work in parallel
 
 Do not concurrently edit these shared control files:
