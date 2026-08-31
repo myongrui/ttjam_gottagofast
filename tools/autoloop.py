@@ -374,9 +374,15 @@ def call_model(prompt: str, model: str, timeout: int = 600) -> str:
     if not key:
         raise SystemExit("OPENAI_API_KEY is not set (export it, or put it in .env)")
 
+    # Reasoning effort, when the model supports it. Sent only if set, so a
+    # model that rejects the field is never handed one by default.
+    effort = os.environ.get("OPENAI_REASONING_EFFORT", "").strip()
+    responses_body = {"model": model, "instructions": SYSTEM, "input": prompt}
+    if effort:
+        responses_body["reasoning"] = {"effort": effort}
+
     attempts = [
-        ("responses", f"{API_BASE}/responses",
-         {"model": model, "instructions": SYSTEM, "input": prompt}),
+        ("responses", f"{API_BASE}/responses", responses_body),
         ("chat", f"{API_BASE}/chat/completions",
          {"model": model,
           "messages": [{"role": "system", "content": SYSTEM},
@@ -499,7 +505,10 @@ def main() -> int:
     best = ledger.champion(ledger.FULL_CASES, dtype=args.dtype)
     best_score = best["score"] if best else 0.0
     flat = 0
-    log(f"start model={args.model} profile={args.profile} "
+    effort = os.environ.get("OPENAI_REASONING_EFFORT", "").strip()
+    log(f"start model={args.model}"
+        f"{' effort=' + effort if effort else ' effort=<model default>'} "
+        f"profile={args.profile} "
         f"incumbent={best['candidate'] if best else 'none'} score={best_score}")
 
     stop_reason = "completed all iterations"
