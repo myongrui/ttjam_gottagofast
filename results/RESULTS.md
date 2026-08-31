@@ -1,6 +1,6 @@
 # Current best submission
 
-_Regenerated 2026-08-31 04:16:37Z from commit `212e523`. Do not edit — `tools/report.py` overwrites this file._
+_Regenerated 2026-08-31 04:22:03Z from commit `7e3cf5d`. Do not edit — `tools/report.py` overwrites this file._
 
 
 | | |
@@ -12,7 +12,7 @@ _Regenerated 2026-08-31 04:16:37Z from commit `212e523`. Do not edit — `tools/
 | Dispatcher gain over generalist | +0.0% |
 | Measured on | NVIDIA A100-SXM4-80GB, float32 |
 | Champion decision | `promote` over 13 cases |
-| Attempts recorded | 39 |
+| Attempts recorded | 41 |
 
 ## Per-shape selection
 

@@ -296,3 +296,13 @@
 [2026-08-31 04:16:37Z] evaluation finished in 23s (rc=0)
 [2026-08-31 04:16:37Z] no improvement (champion still 2.0916), flat=2
 [2026-08-31 04:16:37Z] iteration 2 took 58s
+[2026-08-31 04:16:40Z] pushed: iteration 2 — v034_native_packed_mha_candidate.py rejected, champion 2.0916
+[2026-08-31 04:16:44Z] --- iteration 3/20 --- route=STRUCTURAL profile=general parent=v024_centralized_attention_mask_dispatch.py beam=3 flat=2 best=2.0916 elapsed=0.0h (13/13 shapes >4.0x off SOL)
+[2026-08-31 04:16:44Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 942x off SOL (memory-bound), case 3 430x off SOL (compute-bound), case 7 238x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate ke
+[2026-08-31 04:16:44Z]   asking the model for a candidate...
+[2026-08-31 04:17:27Z] wrote v035_forced_native_encoder_layer.py (156 lines)
+[2026-08-31 04:17:27Z]   hypothesis: Forced native encoder-layer fast-path candidate.
+[2026-08-31 04:17:27Z] evaluating v035_forced_native_encoder_layer.py on profile=general (timeout 40m)
+[2026-08-31 04:22:03Z] evaluation finished in 275s (rc=0)
+[2026-08-31 04:22:03Z] no improvement (champion still 2.0916), flat=3
+[2026-08-31 04:22:03Z] iteration 3 took 319s
