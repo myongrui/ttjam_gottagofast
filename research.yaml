@@ -22,6 +22,21 @@
     "codex": ["evidence_review", "hypothesis_generation", "candidate_editing", "result_interpretation", "direction_selection"],
     "deterministic_code": ["correctness", "benchmarking", "promotion", "timeouts", "recovery", "persistence"]
   },
+  "orchestration": {
+    "implementation": "codex_native_subagents",
+    "roles": ["lead", "researcher", "skeptic", "synthesizer"],
+    "max_parallel_subagents": 4,
+    "search_connector": "exa",
+    "source_fetch_connector": "exa",
+    "research_evidence_label": "research_evidence",
+    "research_can_promote_candidates": false
+  },
+  "execution": {
+    "provider": "runpod",
+    "control_plane": "runpod_mcp_preferred",
+    "fallback": "repo_local_runpod_scripts",
+    "paid_gpu_requires_separate_authorization": true
+  },
   "canonical_history": "research/events.jsonl",
   "immutable_evidence": ["candidates/**/*.py", "results/**/*.json", "results/**/*.log", "archive/legacy/**"],
   "generated_views": ["results/RESULTS.md", "results/STATUS.md"],

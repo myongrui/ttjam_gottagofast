@@ -83,6 +83,10 @@ def validate_event(event: Dict[str, Any], expected_sequence: Optional[int] = Non
         raise ValueError(f"expected sequence {expected_sequence}, got {event['sequence']}")
     if not isinstance(event["data"], dict) or not isinstance(event["source"], dict):
         raise ValueError("event data and source must be objects")
+    if event["event_type"].startswith("research_"):
+        # Local import avoids making the core store depend on orchestration at import time.
+        import orchestration
+        orchestration.validate_research_event(event)
 
 
 def load_events(path: Path = EVENTS) -> List[Dict[str, Any]]:

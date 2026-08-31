@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 import event_store
+import orchestration
 import routing
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -45,6 +46,9 @@ def main() -> int:
     stop = sub.add_parser("stop"); stop.add_argument("--reason", default="user requested stop")
     sub.add_parser("review")
     route = sub.add_parser("route"); route.add_argument("--cycle", type=int, default=1)
+    ingest = sub.add_parser("ingest-research")
+    ingest.add_argument("packet", type=Path)
+    ingest.add_argument("--contract-hash", required=True)
     race = sub.add_parser("race")
     race.add_argument("candidates", nargs="+")
     race.add_argument("--profile", default="general")
@@ -79,6 +83,12 @@ def main() -> int:
     elif args.command == "route":
         decision = routing.decide(args.cycle, dtype=event_store.target_dtype())
         print(json.dumps({**decision.as_dict(), "guidance": decision.guidance}, indent=2))
+    elif args.command == "ingest-research":
+        require_contract_hash(args.contract_hash)
+        if lifecycle_state() != "running":
+            raise SystemExit("research session is not running; confirm the contract and start or resume first")
+        additions = orchestration.ingest_packet(args.packet, args.contract_hash)
+        print(f"recorded {len(additions)} research evidence events from {args.packet}")
     elif args.command == "race":
         require_contract_hash(args.contract_hash)
         if lifecycle_state() != "running":
