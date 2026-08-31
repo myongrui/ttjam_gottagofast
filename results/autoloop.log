@@ -143,3 +143,13 @@
 [2026-08-31 02:47:40Z] evaluation finished in 136s (rc=0)
 [2026-08-31 02:47:40Z] no improvement (champion still 1.9141), flat=3
 [2026-08-31 02:47:40Z] iteration 6 took 174s
+[2026-08-31 02:47:42Z] pushed: iteration 6 — v021_short_sequence_mask_dispatch.py rejected, champion 1.9141
+[2026-08-31 02:47:46Z] --- iteration 7/120 --- route=STRUCTURAL profile=launch parent=v018_deferred_padding_mask_candidate.py beam=2 flat=3 best=1.9141 elapsed=0.2h (13/13 shapes >4.0x off SOL)
+[2026-08-31 02:47:46Z]   guidance: These shapes are latency-bound, not parameter-bound: case 2 1037x off SOL (memory-bound), case 3 465x off SOL (compute-bound), case 7 284x off SOL (memory-bound). Neither bandwidth nor FLOPs is the constraint, so tile sizes and block dimensions will not help. Propose a STRUCTURAL change: eliminate k
+[2026-08-31 02:47:46Z]   asking the model for a candidate...
+[2026-08-31 02:49:32Z] wrote v022_fused_ffn_candidate.py (221 lines)
+[2026-08-31 02:49:32Z]   hypothesis: Fused-FFN candidate.
+[2026-08-31 02:49:32Z] evaluating v022_fused_ffn_candidate.py on profile=launch (timeout 40m)
+[2026-08-31 02:49:53Z] evaluation finished in 21s (rc=0)
+[2026-08-31 02:49:53Z] no improvement (champion still 1.9141), flat=4
+[2026-08-31 02:49:53Z] iteration 7 took 127s

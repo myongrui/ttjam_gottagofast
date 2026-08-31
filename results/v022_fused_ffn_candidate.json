@@ -1,0 +1,185 @@
+{
+  "candidate": "v022_fused_ffn_candidate.py",
+  "candidate_doc": "Fused-FFN candidate.\n\nHypothesis: for the common d_model=ffn_dim=128 cases, the FFN is dominated by\nkernel-launch overhead rather than GEMM throughput.  A Triton kernel computes\nLinear -> exact GELU -> Linear -> residual addition as one fused operation,\nremoving the intermediate activation materialization and replacing the FFN's\nmultiple launches with one kernel while retaining the existing SDPA attention\nand weight layout.  Other shapes use the exact eager fallback.",
+  "incumbent": "v018_deferred_padding_mask_candidate.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-31T02:49:45",
+  "cases": [
+    {
+      "case": 1,
+      "shape": {
+        "case": 1,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.016,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.003125429153442383,
+            "max_rel": 562.0552978515625
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 0.0004944205284118652,
+            "max_rel": 324.7588195800781
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.009049825370311737,
+            "max_rel": 981.804931640625
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.0034373998641967773,
+            "max_rel": 4370.43505859375
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 0.0016572028398513794,
+            "max_rel": 78.5560302734375
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 0.0023435354232788086,
+            "max_rel": 12.640239715576172
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 0.00032520294189453125,
+            "max_rel": 13.64393138885498
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0039452314376831055,
+            "max_rel": 33.76947784423828
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 0.002517521381378174,
+            "max_rel": 7.163545608520508
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 0.0012056827545166016,
+            "max_rel": 0.9951369762420654
+          }
+        ]
+      },
+      "status": "incorrect"
+    },
+    {
+      "case": 12,
+      "shape": {
+        "case": 12,
+        "batch_size": 64,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 32,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "correctness": {
+        "passed": false,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": false,
+            "max_abs": 0.0026404857635498047,
+            "max_rel": 115.35243225097656
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 0.0004187077283859253,
+            "max_rel": 142.1975860595703
+          },
+          {
+            "variant": "small_scale",
+            "passed": false,
+            "max_abs": 0.0064018964767456055,
+            "max_rel": 266.930419921875
+          },
+          {
+            "variant": "padded",
+            "passed": false,
+            "max_abs": 0.0030493736267089844,
+            "max_rel": 50.81657409667969
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 0.0016435980796813965,
+            "max_rel": 47.942535400390625
+          }
+        ]
+      },
+      "status": "incorrect"
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_unchanged": true,
+  "failed_cases": [
+    1,
+    2,
+    12
+  ],
+  "n_scored": 0,
+  "geomean_speedup": 0.0,
+  "score": 0.0
+}
