@@ -19,13 +19,17 @@ class CanonicalMigrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.events = event_store.load_events()
-        cls.rows = event_store.load(cls.events)
+        cls.migrated_events = [
+            event for event in cls.events
+            if event["source"].get("kind") == "migration"
+        ]
+        cls.rows = event_store.load(cls.migrated_events)
 
     def test_all_sixty_evaluations_are_reconstructed(self):
         self.assertEqual(len(self.rows), 60)
         self.assertEqual(len({row["evaluation_id"] for row in self.rows}), 60)
-        self.assertEqual(len(event_store.events_of("decision", self.events)), 60)
-        self.assertEqual(len(event_store.events_of("comparison", self.events)), 48)
+        self.assertEqual(len(event_store.events_of("decision", self.migrated_events)), 60)
+        self.assertEqual(len(event_store.events_of("comparison", self.migrated_events)), 48)
 
     def test_v038_is_the_a100_80gb_champion(self):
         champion = event_store.champion(event_store.FULL_CASES, entries=self.rows,
@@ -74,7 +78,7 @@ class CanonicalMigrationTests(unittest.TestCase):
                          "v047_homogeneous_coordinate_ffn_bias.py")
 
     def test_candidates_through_v048_and_duplicate_v013_are_preserved(self):
-        candidates = event_store.events_of("candidate", self.events)
+        candidates = event_store.events_of("candidate", self.migrated_events)
         top_level = [event for event in candidates
                      if event["data"]["path"].count("/") == 1]
         self.assertEqual(len(top_level), 50)
@@ -82,7 +86,7 @@ class CanonicalMigrationTests(unittest.TestCase):
         self.assertEqual(sum(event["data"]["candidate_id"] == "v013" for event in top_level), 2)
 
     def test_immutable_artifact_hashes_still_match(self):
-        for event in event_store.events_of("artifact", self.events):
+        for event in event_store.events_of("artifact", self.migrated_events):
             path = ROOT / event["data"]["path"]
             self.assertTrue(path.exists(), path)
             digest = hashlib.sha256(path.read_bytes()).hexdigest()

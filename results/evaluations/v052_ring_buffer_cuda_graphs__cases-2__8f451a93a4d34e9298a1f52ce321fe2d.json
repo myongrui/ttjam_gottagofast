@@ -1,0 +1,165 @@
+{
+  "candidate": "v052_ring_buffer_cuda_graphs.py",
+  "candidate_doc": "Three-slot CUDA-graph replay without an output-clone launch.\n\nHypothesis: v051 still launches an output clone after every graph replay so\nsimultaneously held results cannot alias. Rotating across three independently\ncaptured input/mask/output slots preserves the harness's input-dependence and\nrepeatability semantics while removing that final launch on cases 2, 3, and 7.",
+  "incumbent": "v051_manual_cuda_graph_dispatch.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-31T18:26:56",
+  "cases": [
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 1.0728836059570312e-06,
+            "max_rel": 0.0019511292921379209
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 1.1920928955078125e-06,
+            "max_rel": 9.774048521649092e-05
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 1.9669532775878906e-06,
+            "max_rel": 0.006781308446079493
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 1.1920928955078125e-06,
+            "max_rel": 0.0011823850218206644
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.0020559350959956646
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 0.3675520122051239,
+        "mean_ms": 0.36904853251245284,
+        "min_ms": 0.3659519851207733,
+        "wall_ms": 0.300669534287105,
+        "n": 90,
+        "round_medians_ms": [
+          0.3675839900970459,
+          0.36721599102020264,
+          0.36744000017642975
+        ]
+      },
+      "peak_mem_gib": 0.055,
+      "baseline": {
+        "median_ms": 2.5208160877227783,
+        "mean_ms": 2.5340739462110733,
+        "min_ms": 2.4738879203796387,
+        "wall_ms": 2.4691387991576144,
+        "n": 90,
+        "round_medians_ms": [
+          2.5417120456695557,
+          2.5126240253448486,
+          2.5071200132369995
+        ]
+      },
+      "speedup": 6.858392836973391,
+      "speedup_wall": 8.212134977399703,
+      "paired_speedup": 6.8599580177486,
+      "paired_speedup_ci95": [
+        6.823209264187847,
+        6.914642950033047
+      ],
+      "round_speedups": [
+        6.914642950033047,
+        6.842360046370135,
+        6.823209264187847
+      ],
+      "wall_to_event_ratio": 0.818,
+      "stream_ok": true,
+      "status": "ok",
+      "incumbent": {
+        "median_ms": 0.37137600779533386,
+        "mean_ms": 0.37235982086923386,
+        "min_ms": 0.3701759874820709,
+        "wall_ms": 0.30176493455655873,
+        "n": 90,
+        "round_medians_ms": [
+          0.3716000020503998,
+          0.37136000394821167,
+          0.3713440001010895
+        ]
+      },
+      "vs_incumbent": {
+        "speedup": 1.0104039577072859,
+        "speedup_wall": 1.0036432033995426,
+        "paired_speedup": 1.010945043077178,
+        "paired_speedup_ci95": [
+          1.010624863713219,
+          1.0112849468142606
+        ],
+        "round_speedups": [
+          1.0109254267366041,
+          1.0112849468142606,
+          1.010624863713219
+        ]
+      }
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_unchanged": true,
+  "failed_cases": [],
+  "n_scored": 1,
+  "geomean_speedup": 6.858392836973392,
+  "score": 6.858392836973392,
+  "incumbent_comparison": {
+    "incumbent": "v051_manual_cuda_graph_dispatch.py",
+    "n_cases": 1,
+    "round_geomeans": [
+      1.0109254267366041,
+      1.0112849468142606,
+      1.010624863713219
+    ],
+    "paired_geomean": 1.010945043077178,
+    "paired_geomean_ci95": [
+      1.010624863713219,
+      1.0112849468142606
+    ],
+    "promotion_margin": 0.02,
+    "decision": "uncertain"
+  }
+}

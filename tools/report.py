@@ -32,6 +32,16 @@ def git_sha() -> str:
         return "?"
 
 
+def evaluation_evidence_counts(events: List[Dict[str, Any]]) -> Dict[str, int]:
+    counts: Dict[str, int] = {}
+    for event in events:
+        if event["event_type"] != "evaluation":
+            continue
+        label = event["data"].get("evidence_label", "unlabelled")
+        counts[label] = counts.get(label, 0) + 1
+    return counts
+
+
 def build(dtype: str | None = None) -> str:
     dtype = dtype or event_store.target_dtype()
     gpu = event_store.target_gpu()
@@ -89,7 +99,8 @@ def build(dtype: str | None = None) -> str:
     L.append(f"| Champion decision | `{champ.get('decision', '?')}` "
              f"over {champ.get('n_scored', '?')} cases |")
     L.append(f"| Evaluations recorded | {len(event_store.load())} |")
-    L.append("| Evidence class | migrated archived evidence until a new live run is appended |\n")
+    evidence_class = champ.get("evidence_label", "unlabelled").replace("_", " ")
+    L.append(f"| Evidence class | {evidence_class} |\n")
 
     L.append("## Per-shape selection\n")
     L.append("| case | batch | seq | d_model | heads | implementation | speedup | evidence |")
@@ -138,6 +149,9 @@ def main() -> int:
     state = sessions[-1]["data"]["state"] if sessions else "never started after migration"
     counts = {kind: sum(event["event_type"] == kind for event in events) for kind in
               ("candidate", "evaluation", "comparison", "decision", "milestone_review")}
+    evidence_counts = evaluation_evidence_counts(events)
+    migrated_evaluations = evidence_counts.get("migrated_archived_evidence", 0)
+    live_evaluations = evidence_counts.get("live_runtime_evidence", 0)
     STATUS.write_text(
         "# Autoresearch status\n\n"
         "_Generated from `research/events.jsonl`; do not edit as state._\n\n"
@@ -146,12 +160,13 @@ def main() -> int:
         f"- Scope: **{event_store.target_gpu()}**, **{event_store.target_dtype()}**\n"
         f"- Champion: **{champion['candidate']}**, **{champion['score']:.4f}x**\n"
         f"- Canonical events: {len(events)}\n"
-        f"- Migrated evaluations: {counts['evaluation']}\n"
+        f"- Evaluations: {counts['evaluation']} total; {migrated_evaluations} migrated; "
+        f"{live_evaluations} live runtime\n"
         f"- Comparisons: {counts['comparison']}; decisions: {counts['decision']}; "
         f"milestone reviews: {counts['milestone_review']}\n\n"
         "Evidence labels: historical measurements are **migrated archived evidence**; "
-        "repository checks are **static validation** or **local tests**; no new paid GPU "
-        "benchmark was run by this migration.\n")
+        "new paid-GPU measurements are **live runtime evidence**; repository checks are "
+        "**static validation** or **local tests**.\n")
     print(f"wrote {OUT.relative_to(ROOT)} and {STATUS.relative_to(ROOT)}")
     return 0
 

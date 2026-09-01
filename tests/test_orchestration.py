@@ -121,13 +121,32 @@ class ResearchOrchestrationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing fields"):
             event_store.validate_event(incomplete, 1)
 
+    def test_research_session_uses_lifecycle_schema(self):
+        session = event_store.make_event(
+            "research_session",
+            {
+                "state": "running",
+                "reason": "start",
+                "contract_hash": event_store.contract_hash(),
+                "operator": "codex",
+                "evidence_label": "live_runtime_evidence",
+            },
+            1,
+        )
+        event_store.validate_event(session, 1)
+
+        invalid = copy.deepcopy(session)
+        invalid["data"]["state"] = "paused"
+        with self.assertRaisesRegex(ValueError, "unsupported research session state"):
+            event_store.validate_event(invalid, 1)
+
     def test_research_events_do_not_enter_benchmark_projection(self):
         historical = event_store.load_events()
         before = event_store.load(historical)
         research = self.build()
         after = event_store.load(historical + research)
         self.assertEqual(after, before)
-        self.assertEqual(len(after), 60)
+        self.assertEqual(len(after), len(before))
 
     def test_duplicate_urls_and_unknown_sources_are_rejected(self):
         duplicate = packet()

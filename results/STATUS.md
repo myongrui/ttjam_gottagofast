@@ -2,12 +2,12 @@
 
 _Generated from `research/events.jsonl`; do not edit as state._
 
-- Contract: `5044fbbf70abe2f15f945f4711d1ba7d9ad1520948948a6ce6d6839a21b6fd3b`
-- Session: **never started after migration**
+- Contract: `a65dca4e8cec81a7aeb8466dcba664a289cd018524f6c3d10819ec0c02e7af8b`
+- Session: **stopped**
 - Scope: **NVIDIA A100-SXM4-80GB**, **float32**
-- Champion: **v038_torchscript_dispatched_transformer_candidate.py**, **2.2969x**
-- Canonical events: 443
-- Migrated evaluations: 60
-- Comparisons: 48; decisions: 60; milestone reviews: 5
+- Champion: **v053_expanded_cuda_graph_dispatch.py**, **3.0561x**
+- Canonical events: 493
+- Evaluations: 72 total; 60 migrated; 12 live runtime
+- Comparisons: 60; decisions: 72; milestone reviews: 5
 
-Evidence labels: historical measurements are **migrated archived evidence**; repository checks are **static validation** or **local tests**; no new paid GPU benchmark was run by this migration.
+Evidence labels: historical measurements are **migrated archived evidence**; new paid-GPU measurements are **live runtime evidence**; repository checks are **static validation** or **local tests**.

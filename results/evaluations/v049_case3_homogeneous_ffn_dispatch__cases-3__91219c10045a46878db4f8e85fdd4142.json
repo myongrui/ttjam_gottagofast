@@ -1,0 +1,165 @@
+{
+  "candidate": "v049_case3_homogeneous_ffn_dispatch.py",
+  "candidate_doc": "Case-3 homogeneous-coordinate FFN-bias specialist.\n\nHypothesis: on case 3 (batch 4, sequence 128, width 128, four heads), folding\nthe FFN output bias into two constant GELU channels removes one launch per\ntransformer layer and beats the v038 TorchScript generalist by more than the\n2% paired-confidence promotion margin. Every other static configuration keeps\nthe v038 implementation, isolating the mechanism to the affected shape.",
+  "incumbent": "v038_torchscript_dispatched_transformer_candidate.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-31T18:09:31",
+  "cases": [
+    {
+      "case": 3,
+      "shape": {
+        "case": 3,
+        "batch_size": 4,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.001,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 1.1920928955078125e-06,
+            "max_rel": 0.014667278155684471
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.0009842932922765613
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 2.562999725341797e-06,
+            "max_rel": 0.019637269899249077
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.005976044572889805
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 9.5367431640625e-07,
+            "max_rel": 0.002988578984513879
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 0.8109759986400604,
+        "mean_ms": 0.8136803554164038,
+        "min_ms": 0.7941120266914368,
+        "wall_ms": 0.7812846335582435,
+        "n": 90,
+        "round_medians_ms": [
+          0.8139359951019287,
+          0.8118880093097687,
+          0.8093920052051544
+        ]
+      },
+      "peak_mem_gib": 0.017,
+      "baseline": {
+        "median_ms": 2.512463927268982,
+        "mean_ms": 2.5213472048441568,
+        "min_ms": 2.497312068939209,
+        "wall_ms": 2.4807444346758225,
+        "n": 90,
+        "round_medians_ms": [
+          2.519215941429138,
+          2.5116000175476074,
+          2.51092791557312
+        ]
+      },
+      "speedup": 3.098074334483605,
+      "speedup_wall": 3.1752121162010374,
+      "paired_speedup": 3.0969553347950494,
+      "paired_speedup_ci95": [
+        3.0935301282289647,
+        3.1022395815939423
+      ],
+      "round_speedups": [
+        3.0951032471707536,
+        3.0935301282289647,
+        3.1022395815939423
+      ],
+      "wall_to_event_ratio": 0.963,
+      "stream_ok": true,
+      "status": "ok",
+      "incumbent": {
+        "median_ms": 0.809583991765976,
+        "mean_ms": 0.8197877301110161,
+        "min_ms": 0.7953919768333435,
+        "wall_ms": 0.7849592657294124,
+        "n": 90,
+        "round_medians_ms": [
+          0.8107999861240387,
+          0.8095999956130981,
+          0.8084319829940796
+        ]
+      },
+      "vs_incumbent": {
+        "speedup": 0.9982835412189526,
+        "speedup_wall": 1.0047033206764011,
+        "paired_speedup": 0.997380350551918,
+        "paired_speedup_ci95": [
+          0.9961471061646594,
+          0.9988138970920135
+        ],
+        "round_speedups": [
+          0.9961471061646594,
+          0.9971818604654407,
+          0.9988138970920135
+        ]
+      }
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_unchanged": true,
+  "failed_cases": [],
+  "n_scored": 1,
+  "geomean_speedup": 3.098074334483605,
+  "score": 3.098074334483605,
+  "incumbent_comparison": {
+    "incumbent": "v038_torchscript_dispatched_transformer_candidate.py",
+    "n_cases": 1,
+    "round_geomeans": [
+      0.9961471061646594,
+      0.9971818604654407,
+      0.9988138970920135
+    ],
+    "paired_geomean": 0.997380350551918,
+    "paired_geomean_ci95": [
+      0.9961471061646594,
+      0.9988138970920135
+    ],
+    "promotion_margin": 0.02,
+    "decision": "reject"
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "candidate": "v050_ieee_fused_post_attention.py",
+  "candidate_doc": "IEEE-accurate fused post-attention case-2 candidate.\n\nHypothesis: v039's fused post-attention kernel missed the float32 correctness\ngate only because Triton's default TF32 dot products accumulated differently\nfrom the baseline. Forcing IEEE input precision in its two fused dot products\nshould pass all five case-2 distributions while retaining enough launch\nelimination to beat v038 by more than the 2% paired-confidence margin.",
+  "incumbent": "v038_torchscript_dispatched_transformer_candidate.py",
+  "dtype": "float32",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "torch": "2.8.0+cu128",
+  "timestamp": "2026-08-31T18:17:17",
+  "cases": [
+    {
+      "case": 2,
+      "shape": {
+        "case": 2,
+        "batch_size": 1,
+        "d_model": 128,
+        "num_heads": 4,
+        "seq_len": 128,
+        "num_layers": 4,
+        "ffn_dim": 128
+      },
+      "baseline_score_gib": 0.0,
+      "correctness": {
+        "passed": true,
+        "variants": [
+          {
+            "variant": "normal",
+            "passed": true,
+            "max_abs": 4.5299530029296875e-06,
+            "max_rel": 0.0020408753771334887
+          },
+          {
+            "variant": "large_scale",
+            "passed": true,
+            "max_abs": 4.5299530029296875e-06,
+            "max_rel": 0.0002442699915263802
+          },
+          {
+            "variant": "small_scale",
+            "passed": true,
+            "max_abs": 5.4836273193359375e-06,
+            "max_rel": 0.0061837416142225266
+          },
+          {
+            "variant": "padded",
+            "passed": true,
+            "max_abs": 4.291534423828125e-06,
+            "max_rel": 0.02120160311460495
+          },
+          {
+            "variant": "padded_heavy",
+            "passed": true,
+            "max_abs": 4.291534423828125e-06,
+            "max_rel": 0.000572974153328687
+          }
+        ]
+      },
+      "input_dependence_ok": true,
+      "candidate": {
+        "median_ms": 1.7517760396003723,
+        "mean_ms": 1.7858392887645298,
+        "min_ms": 1.7377599477767944,
+        "wall_ms": 1.5123566321562976,
+        "n": 90,
+        "round_medians_ms": [
+          1.8088000416755676,
+          1.747215986251831,
+          1.7461280226707458
+        ]
+      },
+      "peak_mem_gib": 0.016,
+      "baseline": {
+        "median_ms": 2.4968799352645874,
+        "mean_ms": 2.520490672853258,
+        "min_ms": 2.4697279930114746,
+        "wall_ms": 2.4631484663890055,
+        "n": 90,
+        "round_medians_ms": [
+          2.497343897819519,
+          2.5099040269851685,
+          2.4930078983306885
+        ]
+      },
+      "speedup": 1.425341983689989,
+      "speedup_wall": 1.6286822922693054,
+      "paired_speedup": 1.4147573589142604,
+      "paired_speedup_ci95": [
+        1.3806633349621797,
+        1.436516175867572
+      ],
+      "round_speedups": [
+        1.3806633349621797,
+        1.436516175867572,
+        1.4277348888299561
+      ],
+      "wall_to_event_ratio": 0.863,
+      "stream_ok": true,
+      "status": "ok",
+      "incumbent": {
+        "median_ms": 0.8100799918174744,
+        "mean_ms": 0.8139239119158851,
+        "min_ms": 0.7978240251541138,
+        "wall_ms": 0.7995034335181117,
+        "n": 90,
+        "round_medians_ms": [
+          0.8103519976139069,
+          0.8091520071029663,
+          0.8110080063343048
+        ]
+      },
+      "vs_incumbent": {
+        "speedup": 0.46243353802365944,
+        "speedup_wall": 0.5286474211960115,
+        "paired_speedup": 0.45846400374048113,
+        "paired_speedup_ci95": [
+          0.4480052957447102,
+          0.46446079314038385
+        ],
+        "round_speedups": [
+          0.4480052957447102,
+          0.4631093198951197,
+          0.46446079314038385
+        ]
+      }
+    }
+  ],
+  "env_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "float32_matmul_precision": "highest",
+    "grad_enabled": true,
+    "default_dtype": "torch.float32",
+    "num_threads": 128
+  },
+  "env_unchanged": true,
+  "failed_cases": [],
+  "n_scored": 1,
+  "geomean_speedup": 1.425341983689989,
+  "score": 1.425341983689989,
+  "incumbent_comparison": {
+    "incumbent": "v038_torchscript_dispatched_transformer_candidate.py",
+    "n_cases": 1,
+    "round_geomeans": [
+      0.4480052957447102,
+      0.4631093198951197,
+      0.46446079314038385
+    ],
+    "paired_geomean": 0.45846400374048113,
+    "paired_geomean_ci95": [
+      0.4480052957447102,
+      0.46446079314038385
+    ],
+    "promotion_margin": 0.02,
+    "decision": "reject"
+  }
+}

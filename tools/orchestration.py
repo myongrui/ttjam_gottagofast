@@ -18,6 +18,7 @@ RESEARCH_EVENT_TYPES = {
     "research_plan", "research_delegation", "research_source", "research_finding",
     "research_critique", "research_synthesis",
 }
+SESSION_STATES = {"running", "stopped"}
 FORBIDDEN_BENCHMARK_FIELDS = {
     "score", "geomean", "per_case", "failed_cases", "env_unchanged", "evaluation_id",
     "comparison_id", "decision_id", "outcome", "promotion_scope", "paired_speedup",
@@ -87,6 +88,21 @@ def validate_research_event(event: Dict[str, Any]) -> None:
     """Validate the invariant shared by every persisted research event."""
     event_type = event.get("event_type", "")
     if not event_type.startswith("research_"):
+        return
+    if event_type == "research_session":
+        data = event["data"]
+        _require_fields(
+            data,
+            {"state", "reason", "contract_hash", "operator", "evidence_label"},
+            event_type,
+        )
+        if data["state"] not in SESSION_STATES:
+            raise ValueError(f"unsupported research session state {data['state']}")
+        _require_nonempty_string(data["contract_hash"], "research_session.contract_hash")
+        if data["operator"] != "codex":
+            raise ValueError("research session operator must be codex")
+        if data["evidence_label"] != "live_runtime_evidence":
+            raise ValueError("research sessions must be labelled live_runtime_evidence")
         return
     if event_type not in RESEARCH_EVENT_TYPES:
         raise ValueError(f"unsupported research event type {event_type}")
