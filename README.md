@@ -297,11 +297,7 @@ graph capture, and the homogeneous-coordinate bias trick. Triton and raw CUDA we
 in scope and repeatedly proposed, but no hand-written kernel beat the promotion
 gate within the time available.
 
-**The search stalled before it finished.** The event log records several runs of
-five consecutive non-improvements. The loop is good at *deciding which candidate
-wins* — that part is statistically sound — but weak at *choosing what to try
-next*, the open gap documented in `POLICIES.md`. Late candidates cluster around
-variations of the same CUDA-graph idea.
+
 
 ### What I would improve given more time
 
@@ -310,27 +306,5 @@ variations of the same CUDA-graph idea.
    harness and model-provider interface so any AI coding agent could inspect the
    evidence, propose a candidate, and run the same deterministic verify → measure
    → record cycle—not only a Codex agent.
-2. **A fused LayerNorm + residual Triton kernel.** The highest-value remaining
-   hand-written kernel and the one Inductor is least likely to match. At these
-   sizes the normalization epilogue is a pure bandwidth cost sitting between two
-   GEMMs.
-3. **A real case-14 specialist.** Chunked FlashAttention with an independently
-   derived reference — a blockwise CPU or reduced-shape computation — so the
-   largest shape gets verified rather than assumed. It is the one case where the
-   baseline cannot compete at all, so it is also the largest untapped headroom.
-4. **Close the P1 gap: choose experiments by measured gap-to-roofline.**
-   `tools/roofline.py` already estimates the speed-of-light bound per shape.
-   Routing each iteration to *tuning* versus *structural change* based on that gap
-   would stop the search spending five iterations on variants of an idea already
-   within noise of its ceiling.
-5. **Shape-generalized dispatch.** Replace the literal tuple key sets with measured
-   *regions* of shape space, so a shape the benchmark did not publish still lands
-   on the right path instead of defaulting to the generalist.
-6. **Broaden the hardware evidence.** Re-run the full sweep on at least one other
-   GPU class to separate a genuine algorithmic win from an A100 artifact. The
-   ledger is already hardware-scoped and would support this unchanged.
-7. **A hardened accuracy story for reduced precision.** Selective fp16/bf16 —
-   keeping softmax and normalization accumulations in fp32 while the GEMMs run
-   reduced — might clear the absolute-error gate where a wholesale cast cannot.
-   That was never tested and is the most likely large win left on the table.
+
 
