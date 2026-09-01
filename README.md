@@ -200,17 +200,26 @@ python3 tools/report.py         # regenerate both from research/events.jsonl
 python3 -m unittest discover tests -v
 ```
 
-### 5. Re-run the full research loop (optional, uses paid GPU)
+### 5. Run the full research loop in Codex (optional, uses paid GPU)
 
-```bash
-python3 tools/controller.py contract      # print research.yaml + its sha256
-python3 tools/controller.py status
-python3 tools/controller.py race --contract-hash <hash> \
-  --paid-gpu-authorized --profile general candidates/v060_self_contained_portfolio.py
-```
+The autoresearch loop is run from the **Codex app**, not by invoking the
+controller commands manually:
 
-The controller refuses to run without the exact current contract hash and an
-explicit paid-GPU authorization flag, so no experiment starts by accident.
+1. Open this repository as a project in Codex.
+2. Ask Codex to use the repo-local `autoresearch` skill to **start**, **resume**,
+   **review**, or **stop** the research loop. For example: `Use autoresearch to
+   resume the transformer optimization loop.`
+3. Before starting, resuming, or evaluating a candidate, Codex will display the
+   complete `research.yaml` contract and its SHA-256 hash. Confirm that exact
+   contract when prompted.
+4. If the next experiment requires RunPod, separately authorize the paid GPU run
+   and any required infrastructure action when Codex asks.
+
+Codex then reviews the evidence, selects a hypothesis, creates one candidate,
+and interprets the result. The repository's deterministic controller and harness
+perform validation, benchmarking, promotion, recovery, and persistence behind
+the workflow. They still require the confirmed contract hash and explicit paid
+GPU authorization, so no experiment starts accidentally.
 
 ### Measured results
 
