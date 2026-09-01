@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
-import ledger  # noqa: E402
+import event_store  # noqa: E402
 import shapes  # noqa: E402
 
 
@@ -31,10 +31,10 @@ SPECIALIST_MARGIN = 1.02
 
 
 def choose_mapping(dtype: str):
-    champion = ledger.champion(ledger.FULL_CASES, dtype=dtype)
-    gpu = champion.get("gpu") if champion else None
-    elites = ledger.per_shape_elites(dtype=dtype, top_k=1, proven_only=True,
-                                     gpu=gpu)
+    gpu = event_store.target_gpu()
+    champion = event_store.champion(event_store.FULL_CASES, dtype=dtype, gpu=gpu)
+    elites = event_store.per_shape_elites(dtype=dtype, top_k=1, proven_only=True,
+                                          gpu=gpu)
     if not champion:
         raise RuntimeError(f"no full-sweep {dtype} champion is available")
     fallback = champion["candidate"]
@@ -131,7 +131,7 @@ def load_from_baseline(model, baseline):
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dtype", default=ledger.DEFAULT_DTYPE)
+    parser.add_argument("--dtype", default=event_store.target_dtype())
     parser.add_argument("--out", help="generated candidate path; default stdout")
     args = parser.parse_args()
     source = render(args.dtype)

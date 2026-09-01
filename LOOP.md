@@ -58,7 +58,7 @@ These are measured on this pod, not assumed. They constrain every candidate.
    worst case 0.980 on batch=1. Treat sub-2% deltas on tiny shapes as noise.
 4. **Scores compare only within one case set, dtype, and GPU.** A 3-case score
    and a 13-case score are different quantities, as are bf16 and fp32 runs;
-   `tools/ledger.py` groups only compatible measurements. Screen on the cases
+   `tools/event_store.py` enforces the `research.yaml` hardware scope. Screen on the cases
    affected by the hypothesis, then use the full sweep for global promotion.
 5. **Most shapes are launch-bound.** 11 of 14 have `d_model=128, ffn=128,
    head_dim=32`. v001's largest win is on case 2 (batch=1, 1.61×) — the
@@ -94,7 +94,7 @@ archive capture diversity without spending the pod budget on search machinery.
 
 Each race:
 
-1. **Read** `results/ledger.jsonl` (`python3 tools/ledger.py`). Identify the
+1. **Read** the generated views and relevant events in `research/events.jsonl`. Identify the
    beam, shape elites, and every hypothesis already refuted.
 2. **Choose a parent** from the global beam or the elite for the shapes being
    targeted. Do not force every mutation to descend from the global champion.
@@ -164,74 +164,41 @@ Ordered by expected payoff per unit effort, informed by the shape table.
 
 Search policy itself is a separate decision — see `POLICIES.md`.
 
-## Unattended operation
+## Canonical operation
 
-`tools/autoloop.py` runs the loop with no Claude Code session, so it does not
-consume a Claude usage window. OpenAI performs the proposal step; `race.py` does
-the measuring, so the selection policy is unchanged.
+The repo-local `autoresearch` skill is the only standard entrypoint. It always
+shows `research.yaml` and asks the user to confirm its exact hash before start,
+resume, or candidate execution. Codex reads the canonical evidence, proposes
+and edits candidates, interprets outcomes, and selects the next direction.
 
-```bash
-export OPENAI_API_KEY=sk-...          # never commit; keep out of pod env
-export OPENAI_MODEL=<model you have>  # printed at startup
-python3 tools/autoloop.py --dry-run                      # generate + screen only
-caffeinate -i python3 tools/autoloop.py --max-iters 20 --max-hours 6
-```
+`tools/controller.py` records lifecycle state and invokes deterministic routing
+or racing; it contains no model API client. `tools/harness.py` owns correctness
+and benchmark integrity, `tools/race.py` owns screening and full-sweep control,
+and `tools/event_store.py` owns hardware-scoped promotion and append-only
+persistence. Timeouts and infrastructure recovery must remain deterministic and
+separate from hypothesis generation.
 
-Generated code is executed on the pod minutes later, so it passes a static
-screen first (`FORBIDDEN` in `autoloop.py`) covering the three documented
-reward-hacking families plus file/process I/O. The screen is a cheap filter, not
-a sandbox — the harness's runtime integrity checks remain the real defence.
-
-Stops on whichever comes first: iteration count, wall-clock, consecutive
-non-improvements, or an unreachable pod. It does **not** start the pod; a dead
-pod ends the run rather than recording candidates as failures.
-
-
-### Pod lifecycle
-
-Starting is automatic. `ensure_pod()` runs before every evaluation, not just at
-launch: it probes ssh, starts the pod when it is down, and waits for the boot.
-Pods on this account have stopped mid-session four times across both community
-and secure clouds, and recovering costs one start where aborting costs the rest
-of the run. `--no-start-pod` opts out.
-
-Stopping is **not** symmetric and is therefore still opt-in.
-
-### Why `--stop-pod` can cost you the GPU
-
-A stopped Runpod pod stays bound to its original host, and its GPU is released
-to other users. Restarting only succeeds if that specific machine still has a
-free card. On a scarce GPU it does not:
-
-```
-HTTP 400: There are not enough free GPUs on the host machine to start this pod.
-```
-
-This happened twice on A100 80GB even while the pool showed HIGH availability —
-capacity existed, just not on the pinned host. So `--stop-pod` trades money for
-resumability. For a long session, prefer leaving the pod running; for an
-overnight unattended run, keep `--stop-pod` and accept that resuming may mean
-creating a fresh pod. Everything needed lives in git, so a rebuild is one
-`podsync` plus a repoint of `RUNPOD_POD_ID`/`POD_SSH` in `.env`.
+`research/events.jsonl` is the sole canonical history. Candidate files and raw
+benchmark outputs are immutable evidence referenced by events. `RESULTS.md` and
+`STATUS.md` are generated views, and `archive/legacy/` is audit-only.
 
 
 ## Running it
 
 ```bash
-python3 tools/ledger.py status
+python3 tools/controller.py contract   # show this and obtain user confirmation
+python3 tools/controller.py status
 
 # Race one or several candidates. The current full-sweep champion is selected
 # automatically and frozen for the race.
-python3 tools/race.py --profile launch \
-  candidates/v004_fused_norm.py candidates/v005_ffn_compile.py
+python3 tools/controller.py race --contract-hash <confirmed-hash> \
+  --paid-gpu-authorized --profile launch candidates/v049_example.py
 
-# A manual paired run remains available. Fourth argument optionally fixes the
-# incumbent; otherwise iterate.sh selects the current champion.
-tools/iterate.sh candidates/v004_fused_norm.py 1,2,12 float32
-
-# Materialize the current per-shape archive as a normal candidate, then race it.
-python3 tools/build_dispatcher.py --out candidates/v010_portfolio.py
-python3 tools/race.py --profile general candidates/v010_portfolio.py
+# Codex may materialize a dispatcher after contract confirmation, then execute
+# it through the controller like every other candidate.
+python3 tools/build_dispatcher.py --out candidates/v049_portfolio.py
+python3 tools/controller.py race --contract-hash <confirmed-hash> \
+  --paid-gpu-authorized --profile general candidates/v049_portfolio.py
 ```
 
 ## Human collaboration
@@ -240,7 +207,6 @@ The three-minute partner handoff, parallel-work split, and final shape-dispatch
 submission workflow live in `READMEFORJJ.md`. This file stays focused on the
 model-facing optimization policy and measured findings.
 
-Pod control is via the RunPod MCP tools (`start-pod` / `stop-pod`, id
-`132yirw3l7rq7s`). It is **community cloud and has already stopped once
-mid-session** — `iterate.sh` exits 3 on an unreachable pod rather than recording
-a false zero. `/workspace` survives a stop; it does not survive a terminate.
+Infrastructure lifecycle is separate from research lifecycle. Starting,
+stopping, or replacing paid GPU infrastructure requires its own current user
+authorization; `controller.py stop` records research state only.

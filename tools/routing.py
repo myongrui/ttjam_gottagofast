@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Layer 1 -- deterministic routing. Free, runs every cycle, no model involved.
+"""Deterministic routing over canonical autoresearch events.
 
 Decides *what kind of move to make next*, which the portfolio search does not:
 that policy selects which candidate wins, but is silent on whether the next
 attempt should tune an existing structure or replace it. Everything here is
-arithmetic over the ledger and the roofline, so it costs nothing per cycle.
+arithmetic over hardware-scoped evaluations and the roofline.
 
 Three rules, each implementing a specific criticism of the selection-only loop:
 
@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import ledger
+import event_store
 import roofline
 import tuner
 from race import PROFILES
@@ -85,21 +85,25 @@ def adaptive_widths(n_eligible: int) -> tuple[int, int]:
 # BIAS -- measure and bound screen-to-full divergence
 # --------------------------------------------------------------------------
 
-def screen_bias(entries: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+def screen_bias(entries: Optional[List[Dict[str, Any]]] = None,
+                gpu: Optional[str] = None, dtype: Optional[str] = None) -> Dict[str, Any]:
     """How often a screen win fails to survive the full sweep.
 
     Screening is what makes the loop affordable, so the goal is not to remove it
     but to keep it honest. A candidate that screens `promote` and then fails the
     13-case sweep is evidence the screen profile flattered it.
     """
-    rows = entries if entries is not None else ledger.load()
+    scoped_gpu = gpu or event_store.target_gpu()
+    scoped_dtype = dtype or event_store.target_dtype()
+    rows = [entry for entry in (entries if entries is not None else event_store.load())
+            if entry.get("gpu") == scoped_gpu and entry.get("dtype") == scoped_dtype]
     by_candidate: Dict[str, Dict[str, str]] = {}
     for e in rows:
         decision = e.get("decision") or ""
         slot = by_candidate.setdefault(e["candidate"], {})
         if decision.startswith("screen_"):
             slot["screen"] = decision[len("screen_"):]
-        elif ledger.case_set(e) == ledger.FULL_CASES:
+        elif event_store.case_set(e) == event_store.FULL_CASES:
             slot["full"] = decision
     confirmed = contradicted = 0
     offenders = []
@@ -155,11 +159,15 @@ def tuning_state(candidate: str) -> Dict[str, Any]:
     if not sites["kernels"] or not sites["num_warps"]:
         return {"tunable": False, "sites": sites,
                 "reason": "no triton kernel with a launch parameter to sweep"}
-    record = ROOT / "results" / f"tuning_{path.stem}_best.json"
-    if not record.exists():
+    artifact_events = event_store.events_of("artifact")
+    artifact = next((event for event in reversed(artifact_events)
+                     if event["data"].get("path") ==
+                     f"results/tuning_{path.stem}_best.json"), None)
+    if artifact is None:
         return {"tunable": True, "swept": False, "sites": sites,
                 "reason": f"{sites['kernels']} kernel(s), {sites['num_warps']} "
                           f"launch site(s), never swept"}
+    record = ROOT / artifact["data"]["path"]
     best = json.loads(record.read_text())
     gain = best.get("global_geomean", 0.0)
     return {"tunable": True, "swept": True, "sites": sites,
@@ -167,12 +175,16 @@ def tuning_state(candidate: str) -> Dict[str, Any]:
             "reason": f"already swept (best geomean {gain:.4f})"}
 
 
-def plateau_length(entries: Optional[List[Dict[str, Any]]] = None) -> int:
+def plateau_length(entries: Optional[List[Dict[str, Any]]] = None,
+                   gpu: Optional[str] = None, dtype: Optional[str] = None) -> int:
     """Consecutive full-sweep runs since the last promotion."""
-    rows = entries if entries is not None else ledger.load()
+    scoped_gpu = gpu or event_store.target_gpu()
+    scoped_dtype = dtype or event_store.target_dtype()
+    rows = [entry for entry in (entries if entries is not None else event_store.load())
+            if entry.get("gpu") == scoped_gpu and entry.get("dtype") == scoped_dtype]
     n = 0
     for e in reversed(rows):
-        if ledger.case_set(e) != ledger.FULL_CASES:
+        if event_store.case_set(e) != event_store.FULL_CASES:
             continue
         if e.get("decision") in ("promote", "bootstrap"):
             break
@@ -190,7 +202,7 @@ def champion_report(champ: Optional[Dict[str, Any]]) -> Optional[Path]:
         return None
     want = champ["candidate"]
     newest, newest_mtime = None, -1.0
-    for path in (ROOT / "results").glob("*.json"):
+    for path in (ROOT / "results").rglob("*.json"):
         try:
             with path.open() as f:
                 r = json.load(f)
@@ -199,8 +211,10 @@ def champion_report(champ: Optional[Dict[str, Any]]) -> Optional[Path]:
         # results/ also holds tuning manifests, which are JSON lists.
         if not isinstance(r, dict) or r.get("candidate") != want:
             continue
+        if r.get("gpu") != champ.get("gpu") or r.get("dtype") != champ.get("dtype"):
+            continue
         cases = ",".join(str(c["case"]) for c in r.get("cases", []))
-        if cases != ledger.FULL_CASES:
+        if cases != event_store.FULL_CASES:
             continue
         mtime = path.stat().st_mtime
         if mtime > newest_mtime:
@@ -210,10 +224,13 @@ def champion_report(champ: Optional[Dict[str, Any]]) -> Optional[Path]:
 
 def decide(cycle: int, dtype: str = "float32",
            plateau_limit: int = 3) -> Decision:
-    entries = ledger.load()
-    champ = ledger.champion(ledger.FULL_CASES, dtype=dtype)
+    entries = event_store.load()
+    champ = event_store.champion(event_store.FULL_CASES, dtype=dtype,
+                                 gpu=event_store.target_gpu())
     eligible = [e for e in entries
-                if e.get("score", 0) > 0 and ledger.globally_eligible(e)]
+                if e.get("score", 0) > 0 and e.get("gpu") == event_store.target_gpu()
+                and e.get("dtype") == dtype
+                and event_store.globally_eligible(e)]
     beam, elite_k = adaptive_widths(len(eligible))
 
     if champ is None:
@@ -243,7 +260,7 @@ def decide(cycle: int, dtype: str = "float32",
     done = [c for c, v in gaps.items() if v[2] < SOL_DONE]
     tunable = {c: v for c, v in gaps.items() if SOL_DONE <= v[2] < SOL_STRUCTURAL}
     structural = {c: v for c, v in gaps.items() if v[2] >= SOL_STRUCTURAL}
-    stalled = plateau_length(entries)
+    stalled = plateau_length(entries, gpu=event_store.target_gpu(), dtype=dtype)
 
     if len(done) == len(gaps):
         return Decision("STOP", "every shape is within 1.5x of speed-of-light",

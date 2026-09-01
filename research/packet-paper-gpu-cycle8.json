@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "plan": {
+    "plan_id": "plan-paper-gpu-cycle8",
+    "objective": "Select a paper-backed structural optimization for the A100 FP32 launch-bound cases without changing the hackathon forward contract.",
+    "lead_role": "lead",
+    "contract_hash": "a65dca4e8cec81a7aeb8466dcba664a289cd018524f6c3d10819ec0c02e7af8b",
+    "workstreams": [
+      {
+        "workstream_id": "ws-gpu-kernels",
+        "role": "researcher",
+        "question": "Which paper-backed A100 kernel and fusion mechanisms can reduce launches or memory traffic for exact FP32 causal Transformer forward in cases 2, 3, and 7?",
+        "acceptance_criteria": [
+          "primary paper or official implementation",
+          "mechanism maps to an official case",
+          "exact numerical semantics are plausibly preserved",
+          "concrete Triton or CUDA implementation path"
+        ]
+      },
+      {
+        "workstream_id": "ws-forward-architecture",
+        "role": "researcher",
+        "question": "Which internal architectural or algebraic reformulations compute the same fixed pre-norm Transformer function while reducing A100 runtime?",
+        "acceptance_criteria": [
+          "primary paper or official implementation",
+          "explicit exactness argument and weight mapping",
+          "compatible with fixed shapes and correctness gate",
+          "not training-time-only"
+        ]
+      },
+      {
+        "workstream_id": "ws-counterevidence",
+        "role": "skeptic",
+        "question": "Which hardware, dtype, shape, correctness, and implementation constraints invalidate the proposed paper-derived optimizations?",
+        "acceptance_criteria": [
+          "independent counterevidence",
+          "exact benchmark mismatch",
+          "primary or official source where external evidence is used"
+        ]
+      }
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "src-gpu-1",
+      "workstream_id": "ws-gpu-kernels",
+      "agent_role": "researcher",
+      "connector": "exa",
+      "url": "https://arxiv.org/html/2207.00032",
+      "title": "DeepSpeed Inference: Enabling Efficient Inference of Transformer Models at Unprecedented Scale",
+      "retrieved_at": "2026-09-01T00:25:42Z",
+      "quality": "paper"
+    },
+    {
+      "source_id": "src-gpu-2",
+      "workstream_id": "ws-gpu-kernels",
+      "agent_role": "researcher",
+      "connector": "exa",
+      "url": "https://doi.org/10.1109/icpads67057.2025.11322894",
+      "title": "Breaking the Fusion Barrier: An Online Algorithm for Fused Normalization and Linear Layers",
+      "retrieved_at": "2026-09-01T00:25:42Z",
+      "quality": "paper"
+    },
+    {
+      "source_id": "src-gpu-3",
+      "workstream_id": "ws-gpu-kernels",
+      "agent_role": "researcher",
+      "connector": "exa",
+      "url": "https://arxiv.org/html/2407.09577",
+      "title": "FlashNorm: Fast Normalization for Transformers",
+      "retrieved_at": "2026-09-01T00:25:42Z",
+      "quality": "paper"
+    },
+    {
+      "source_id": "src-prenorm",
+      "workstream_id": "ws-forward-architecture",
+      "agent_role": "researcher",
+      "connector": "exa",
+      "url": "https://proceedings.neurips.cc/paper_files/paper/2023/file/8f1bacee31caf990a4f08d84f0ccb322-Paper-Conference.pdf",
+      "title": "Pre-RMSNorm and Pre-CRMSNorm Transformers: Equivalent and Efficient Pre-LN Transformers",
+      "retrieved_at": "2026-09-01T00:26:33Z",
+      "quality": "paper"
+    },
+    {
+      "source_id": "src-cuda-graphs",
+      "workstream_id": "ws-counterevidence",
+      "agent_role": "skeptic",
+      "connector": "exa",
+      "url": "https://docs.nvidia.com/dl-cuda-graph/latest/cuda-graph-basics/constraints.html",
+      "title": "CUDA Graph Best Practice for PyTorch: Constraints",
+      "retrieved_at": "2026-09-01T00:25:38Z",
+      "quality": "official"
+    },
+    {
+      "source_id": "src-ft",
+      "workstream_id": "ws-counterevidence",
+      "agent_role": "skeptic",
+      "connector": "exa",
+      "url": "https://github.com/NVIDIA/FasterTransformer/blob/main/docs/bert_guide.md",
+      "title": "FasterTransformer BERT Guide",
+      "retrieved_at": "2026-09-01T00:25:38Z",
+      "quality": "official"
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "finding-gpu-1",
+      "workstream_id": "ws-gpu-kernels",
+      "agent_role": "researcher",
+      "claim": "For affine LayerNorm followed by a linear projection, precompute A=W*diag(gamma), c=b+W*beta, and r=A*1, then compute ((A*x)-mean(x)*r)*rsqrt(var(x)+eps)+c in one shape-specialized kernel. The real-arithmetic identity removes the normalized activation and one device launch at every norm1-to-packed-QKV and norm2-to-FFN-in boundary in cases 2, 3, and 7.",
+      "source_ids": [
+        "src-gpu-2",
+        "src-gpu-3"
+      ]
+    },
+    {
+      "finding_id": "finding-gpu-2",
+      "workstream_id": "ws-gpu-kernels",
+      "agent_role": "researcher",
+      "claim": "Deep-Fusion provides a bounded FP32 implementation blueprint for fusing input LayerNorm with QKV GEMM and post-attention LayerNorm with the intermediate FFN GEMM, including retiled GEMM schedules for small output dimensions rather than a monolithic whole-block kernel.",
+      "source_ids": [
+        "src-gpu-1"
+      ]
+    },
+    {
+      "finding_id": "finding-prerms-equivalence",
+      "workstream_id": "ws-forward-architecture",
+      "agent_role": "researcher",
+      "claim": "The centered-residual Pre-RMSNorm transformation is a paper-proven exact real-arithmetic reformulation of a pre-LayerNorm Transformer, but it requires centering the initial residual, projecting every sublayer output weight and bias, folding every LayerNorm affine, maintaining the centered subspace, and reconstructing the final affine normalization.",
+      "source_ids": [
+        "src-prenorm"
+      ]
+    }
+  ],
+  "critiques": [
+    {
+      "critique_id": "c-graph-ceiling",
+      "workstream_id": "ws-counterevidence",
+      "agent_role": "skeptic",
+      "finding_ids": [
+        "finding-gpu-1",
+        "finding-gpu-2"
+      ],
+      "verdict": "mixed",
+      "rationale": "The champion already graph-replays the raw model for cases 2, 3, and 7, and prior graph-only changes did not clear the promotion margin. A new candidate must eliminate device kernels and activation traffic inside the captured graph; replay or buffer management alone is insufficient.",
+      "source_ids": [
+        "src-cuda-graphs"
+      ]
+    },
+    {
+      "critique_id": "c-library-shapes",
+      "workstream_id": "ws-counterevidence",
+      "agent_role": "skeptic",
+      "finding_ids": [
+        "finding-gpu-2"
+      ],
+      "verdict": "mixed",
+      "rationale": "Published fused-library paths validate bounded normalization-plus-GEMM fusion, but the documented head-size fast path does not match the official cases. The benchmark therefore requires custom exact FP32 D=32 and D=128 kernels rather than a drop-in FasterTransformer path.",
+      "source_ids": [
+        "src-ft"
+      ]
+    },
+    {
+      "critique_id": "c-architecture-correctness",
+      "workstream_id": "ws-counterevidence",
+      "agent_role": "skeptic",
+      "finding_ids": [
+        "finding-prerms-equivalence"
+      ],
+      "verdict": "mixed",
+      "rationale": "A direct RMSNorm substitution changes the fixed function. The centered-residual transformation is exact over real arithmetic, but its global weight and residual rewrite creates more finite-precision and implementation risk than the local deferred LayerNorm-plus-linear identity.",
+      "source_ids": []
+    }
+  ],
+  "synthesis": {
+    "synthesis_id": "synthesis-paper-gpu-cycle8",
+    "agent_role": "synthesizer",
+    "hypothesis": "Starting from v053, replace the raw v044 graph inner only for cases 2, 7, and 3 with shape-specialized deferred LayerNorm-plus-linear kernels at every norm1-to-packed-QKV and norm2-to-FFN-in boundary, then capture the reduced kernel sequence in the existing CUDA graph. This should reduce device launches and normalized-activation traffic while preserving the original function over real arithmetic.",
+    "finding_ids": [
+      "finding-gpu-1",
+      "finding-gpu-2",
+      "finding-prerms-equivalence"
+    ],
+    "critique_ids": [
+      "c-graph-ceiling",
+      "c-library-shapes",
+      "c-architecture-correctness"
+    ],
+    "source_ids": [
+      "src-gpu-1",
+      "src-gpu-2",
+      "src-gpu-3",
+      "src-prenorm",
+      "src-cuda-graphs",
+      "src-ft"
+    ],
+    "uncertainties": [
+      "The papers do not benchmark the exact A100 FP32 official shapes.",
+      "FP32 reassociation may fail the strict elementwise correctness gate.",
+      "A custom projection can lose to cuBLAS without separate D=32 and D=128 schedules.",
+      "The gain must come from fewer device kernels and less intermediate traffic because CUDA graph replay already removes host submission overhead.",
+      "Prior v012 and v026 failures were compilation failures rather than runtime refutations of this mechanism."
+    ]
+  }
+}

@@ -1,17 +1,7 @@
 #!/usr/bin/env python3
-"""Regenerate results/RESULTS.md -- the human-readable state of the submission.
-
-The ledger is append-only and machine-shaped, and STATUS.md is a log of stops.
-Neither answers "what would we submit right now, and how fast is it?" at a
-glance -- especially once the answer stops being a single file and becomes one
-generalist plus a set of per-shape specialists.
-
-This file is REWRITTEN every time, never appended, so it always describes the
-present rather than a history.
-"""
+"""Regenerate human-readable views from the canonical event store."""
 from __future__ import annotations
 
-import json
 import math
 import subprocess
 import sys
@@ -22,10 +12,11 @@ from typing import Any, Dict, List
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 import build_dispatcher  # noqa: E402
-import ledger  # noqa: E402
+import event_store  # noqa: E402
 import shapes as shapes_mod  # noqa: E402
 
 OUT = ROOT / "results" / "RESULTS.md"
+STATUS = ROOT / "results" / "STATUS.md"
 
 
 def geomean(values: List[float]) -> float:
@@ -41,13 +32,25 @@ def git_sha() -> str:
         return "?"
 
 
-def build(dtype: str = "float32") -> str:
-    champ = ledger.champion(ledger.FULL_CASES, dtype=dtype)
+def evaluation_evidence_counts(events: List[Dict[str, Any]]) -> Dict[str, int]:
+    counts: Dict[str, int] = {}
+    for event in events:
+        if event["event_type"] != "evaluation":
+            continue
+        label = event["data"].get("evidence_label", "unlabelled")
+        counts[label] = counts.get(label, 0) + 1
+    return counts
+
+
+def build(dtype: str | None = None) -> str:
+    dtype = dtype or event_store.target_dtype()
+    gpu = event_store.target_gpu()
+    champ = event_store.champion(event_store.FULL_CASES, dtype=dtype, gpu=gpu)
     if not champ:
         return ("# Current best submission\n\nNo full-sweep champion yet. "
-                "Run `tools/autoloop.py` or a full `tools/iterate.sh` sweep.\n")
+                "Use the repo-local autoresearch skill to begin a confirmed run.\n")
 
-    elites = ledger.per_shape_elites(dtype=dtype, top_k=1, proven_only=True)
+    elites = event_store.per_shape_elites(dtype=dtype, top_k=1, proven_only=True, gpu=gpu)
     try:
         fallback, _mapping, notes = build_dispatcher.choose_mapping(dtype)
     except Exception as e:                      # composer unavailable
@@ -95,7 +98,9 @@ def build(dtype: str = "float32") -> str:
     L.append(f"| Measured on | {champ.get('gpu', '?')}, {dtype} |")
     L.append(f"| Champion decision | `{champ.get('decision', '?')}` "
              f"over {champ.get('n_scored', '?')} cases |")
-    L.append(f"| Attempts recorded | {len(ledger.load())} |\n")
+    L.append(f"| Evaluations recorded | {len(event_store.load())} |")
+    evidence_class = champ.get("evidence_label", "unlabelled").replace("_", " ")
+    L.append(f"| Evidence class | {evidence_class} |\n")
 
     L.append("## Per-shape selection\n")
     L.append("| case | batch | seq | d_model | heads | implementation | speedup | evidence |")
@@ -124,9 +129,11 @@ def build(dtype: str = "float32") -> str:
 
     L.append("\n## How to reproduce\n")
     L.append("```bash")
-    L.append(f"tools/iterate.sh candidates/{fallback} "
-             f"{ledger.FULL_CASES} {dtype}")
-    L.append("python3 tools/build_dispatcher.py   # compose the specialists")
+    L.append("python3 tools/controller.py contract  # show and confirm exact hash")
+    L.append("# After start/resume confirmation and separate paid-GPU authorization:")
+    L.append(f"python3 tools/controller.py evaluate candidates/{fallback} "
+             f"--cases {event_store.FULL_CASES} --contract-hash <confirmed-hash> "
+             "--paid-gpu-authorized")
     L.append("```")
     return "\n".join(L) + "\n"
 
@@ -134,7 +141,33 @@ def build(dtype: str = "float32") -> str:
 def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(build())
-    print(f"wrote {OUT.relative_to(ROOT)}")
+    events = event_store.load_events()
+    evaluations = event_store.load(events)
+    champion = event_store.champion(event_store.FULL_CASES, entries=evaluations,
+                                    dtype=event_store.target_dtype(), gpu=event_store.target_gpu())
+    sessions = [event for event in events if event["event_type"] == "research_session"]
+    state = sessions[-1]["data"]["state"] if sessions else "never started after migration"
+    counts = {kind: sum(event["event_type"] == kind for event in events) for kind in
+              ("candidate", "evaluation", "comparison", "decision", "milestone_review")}
+    evidence_counts = evaluation_evidence_counts(events)
+    migrated_evaluations = evidence_counts.get("migrated_archived_evidence", 0)
+    live_evaluations = evidence_counts.get("live_runtime_evidence", 0)
+    STATUS.write_text(
+        "# Autoresearch status\n\n"
+        "_Generated from `research/events.jsonl`; do not edit as state._\n\n"
+        f"- Contract: `{event_store.contract_hash()}`\n"
+        f"- Session: **{state}**\n"
+        f"- Scope: **{event_store.target_gpu()}**, **{event_store.target_dtype()}**\n"
+        f"- Champion: **{champion['candidate']}**, **{champion['score']:.4f}x**\n"
+        f"- Canonical events: {len(events)}\n"
+        f"- Evaluations: {counts['evaluation']} total; {migrated_evaluations} migrated; "
+        f"{live_evaluations} live runtime\n"
+        f"- Comparisons: {counts['comparison']}; decisions: {counts['decision']}; "
+        f"milestone reviews: {counts['milestone_review']}\n\n"
+        "Evidence labels: historical measurements are **migrated archived evidence**; "
+        "new paid-GPU measurements are **live runtime evidence**; repository checks are "
+        "**static validation** or **local tests**.\n")
+    print(f"wrote {OUT.relative_to(ROOT)} and {STATUS.relative_to(ROOT)}")
     return 0
 
 
