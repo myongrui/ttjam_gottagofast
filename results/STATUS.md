@@ -6,8 +6,8 @@ _Generated from `research/events.jsonl`; do not edit as state._
 - Session: **stopped**
 - Scope: **NVIDIA A100-SXM4-80GB**, **float32**
 - Champion: **v059_paper_fusion_portfolio.py**, **3.1165x**
-- Canonical events: 540
-- Evaluations: 79 total; 60 migrated; 19 live runtime
-- Comparisons: 67; decisions: 79; milestone reviews: 5
+- Canonical events: 550
+- Evaluations: 81 total; 60 migrated; 21 live runtime
+- Comparisons: 69; decisions: 81; milestone reviews: 5
 
 Evidence labels: historical measurements are **migrated archived evidence**; new paid-GPU measurements are **live runtime evidence**; repository checks are **static validation** or **local tests**.
