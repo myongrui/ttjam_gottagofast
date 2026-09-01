@@ -11,3 +11,17 @@ _Generated from `research/events.jsonl`; do not edit as state._
 - Comparisons: 69; decisions: 81; milestone reviews: 5
 
 Evidence labels: historical measurements are **migrated archived evidence**; new paid-GPU measurements are **live runtime evidence**; repository checks are **static validation** or **local tests**.
+
+## Nightly health check — 2026-09-01
+
+Loop healthy, no candidate proposed. Champion is `v059_paper_fusion_portfolio.py`
+at 3.1165x (13-case geomean; composed dispatcher with 2 specialists reaches
+3.1316x), up sharply from the 2.2969x champion seen at the previous check.
+Last 3 full-sweep runs: v058 (uncertain, 3.0675x) → v059 (**promote**, 3.1165x)
+→ v060 (uncertain, 3.1187x, paired CI [0.997, 1.013] straddles 1.0 vs v059) —
+a promotion inside the 3-run window, so the no-promotion stall condition is
+not met. No correctness failures in recent evaluations (v059/v060 both
+`failed_cases: []`); the most recent hard-invalid candidate was v044 on
+2026-08-31. The research session has been `stopped` since 02:17 UTC today,
+but that reflects the operator-driven start/resume/contract-confirmation
+flow in LOOP.md, not a stall.
