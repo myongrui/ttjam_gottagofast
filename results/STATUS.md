@@ -25,3 +25,11 @@ not met. No correctness failures in recent evaluations (v059/v060 both
 2026-08-31. The research session has been `stopped` since 02:17 UTC today,
 but that reflects the operator-driven start/resume/contract-confirmation
 flow in LOOP.md, not a stall.
+
+## Nightly health check — 2026-09-01 (re-check, 20:04 UTC)
+
+Re-run of today's check, ~2h after the 18:03 UTC entry above. Repo HEAD is
+unchanged (still `931330a`), canonical event count unchanged at 550, no new
+candidates or evaluations since the previous check. State is identical to
+the entry above: champion still `v059_paper_fusion_portfolio.py` at 3.1165x,
+no stall, no candidate proposed.
