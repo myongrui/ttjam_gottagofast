@@ -33,3 +33,18 @@ unchanged (still `931330a`), canonical event count unchanged at 550, no new
 candidates or evaluations since the previous check. State is identical to
 the entry above: champion still `v059_paper_fusion_portfolio.py` at 3.1165x,
 no stall, no candidate proposed.
+
+## Nightly health check — 2026-09-02
+
+No change in >24h. Repo HEAD was `2968243` at the start of this check
+(only the two prior health-check commits since `931330a`); canonical
+event count still 550, unchanged since the research session recorded
+`state: stopped` at 2026-09-01T02:17 UTC after v060's uncertain result.
+Champion remains `v059_paper_fusion_portfolio.py` at 3.1165x (dispatcher
+3.1316x). Last 3 full-sweep evaluations: v058 (uncertain, 3.0675x) → v059
+(**promote**, 3.1165x) → v060 (uncertain, 3.1187x) — one promotion inside
+the window, so the no-promotion-in-3-sweeps stall condition is still not
+met; the idle time reflects the operator-driven start/resume flow in
+LOOP.md, not an automatic stall. No correctness failures in recent
+evaluations; no new invalid candidates since v044 (2026-08-31). No
+candidate proposed.
