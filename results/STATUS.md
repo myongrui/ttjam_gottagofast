@@ -96,3 +96,19 @@ during this check's fetch; the checked-out tree already matched the new
 history, so this had no effect on the research state. Loop is idle
 awaiting the next operator-driven contract/resume per LOOP.md, not
 stalled. No candidate proposed.
+
+## Nightly health check — 2026-09-04 (second check, ~20:02 UTC)
+
+Re-run ~2h after the 18:04 UTC check today. Repo HEAD was `541496b`
+(that check's own commit) at the start of this run. Canonical event
+count unchanged at 550; no new candidates or evaluations since the
+previous check. Champion remains `v059_paper_fusion_portfolio.py` at
+3.1165x geomean (dispatcher 3.1316x). Last 3 full-sweep evaluations
+unchanged: v058 (uncertain, 3.0675x) → v059 (**promote**, 3.1165x) →
+v060 (uncertain, 3.1187x, paired CI [0.997, 1.013] straddles 1.0 vs
+v059) — one promotion inside the window, so the no-promotion-in-3-sweeps
+stall condition is still not met. No new correctness failures; no new
+invalid candidates since v044 (2026-08-31). Research session has now
+been idle (`stopped`) for ~3.75 days since 2026-09-01T02:17 UTC, which
+remains the operator-driven start/resume flow in LOOP.md, not an
+automatic stall. No candidate proposed.
