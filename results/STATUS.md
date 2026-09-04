@@ -76,3 +76,23 @@ the window, so the no-promotion-in-3-sweeps stall condition is not met. No
 new correctness failures; no new invalid candidates since v044
 (2026-08-31). Loop is idle awaiting the next operator-driven
 contract/resume per LOOP.md, not stalled. No candidate proposed.
+
+## Nightly health check — 2026-09-04
+
+No change since the 2026-09-03 check. Canonical event count still 550,
+unchanged since the research session recorded `state: stopped` at
+2026-09-01T02:17 UTC following v060's uncertain result — no operator has
+started or resumed a session since (now ~3.5 days idle). Champion remains
+`v059_paper_fusion_portfolio.py` at 3.1165x geomean (13-case; dispatcher
+3.1316x). Last 3 full-sweep evaluations unchanged: v058 (uncertain,
+3.0675x) → v059 (**promote**, 3.1165x) → v060 (uncertain, 3.1187x, paired
+CI [0.997, 1.013] straddles 1.0 vs v059) — one promotion inside the
+window, so the no-promotion-in-3-sweeps stall condition is not met, and
+STATUS.md itself reports no stall. No new correctness failures; the most
+recent hard-invalid candidate is still v044 (2026-08-31, `output did not
+respond to a changed input (caching?)` on cases 1/2/12, integrity_failed,
+score 0.0). Note: `origin/main` was force-updated to the current history
+during this check's fetch; the checked-out tree already matched the new
+history, so this had no effect on the research state. Loop is idle
+awaiting the next operator-driven contract/resume per LOOP.md, not
+stalled. No candidate proposed.
