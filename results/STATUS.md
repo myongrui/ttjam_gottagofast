@@ -112,3 +112,21 @@ invalid candidates since v044 (2026-08-31). Research session has now
 been idle (`stopped`) for ~3.75 days since 2026-09-01T02:17 UTC, which
 remains the operator-driven start/resume flow in LOOP.md, not an
 automatic stall. No candidate proposed.
+
+## Nightly health check — 2026-09-05
+
+No change since the 2026-09-04 20:02 UTC check (repo HEAD was `ac0de3e`,
+that check's own commit). `research/events.jsonl` unchanged at 550
+events; last event is still the research-session `stopped` record at
+2026-09-01T02:17 UTC following v060's uncertain result — now ~4.7 days
+idle with no operator start/resume. Champion remains
+`v059_paper_fusion_portfolio.py` at 3.1165x geomean (13-case; dispatcher
+3.1316x on the 5-case general profile). Last 3 full-sweep evaluations
+unchanged: v058 (uncertain, 3.0675x) → v059 (**promote**, 3.1165x) → v060
+(uncertain, 3.1187x, paired CI [0.997, 1.013] straddles 1.0 vs v059) —
+one promotion inside the window, so the no-promotion-in-3-sweeps stall
+condition is not met. No new correctness failures; the most recent
+hard-invalid candidate is still v044 (2026-08-31, `output did not
+respond to a changed input (caching?)` on cases 1/2/12, integrity_failed,
+score 0.0). Loop is idle awaiting the next operator-driven
+contract/resume per LOOP.md, not stalled. No candidate proposed.
